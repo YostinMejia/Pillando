@@ -1,4 +1,3 @@
-import imp
 import sqlite3 as sql
 
 con=sql.connect("database.db")
@@ -22,7 +21,39 @@ def dbComentarios(comentario):
     con.commit()
     cur.close()
 
-#Ingresan comentarios
+# cur.execute("SELECT fecha FROM comentarios")
+# bd_fechas=cur.fetchall()
+# cur.execute("SELECT id FROM comentarios")
+# id=cur.fetchall()
+# # print(id)
+
+# #Se le pasa una fecha a la vez, ya sea dia o mes o año
+# def limpiarFechas(fecha):
+#     f=re.findall("[^\w]",fecha)
+#     new=[]
+#     if f!=[]:
+#         num=fecha[0]
+#         temp=list(fecha)
+#         temp[0]="0"
+#         temp[1]=f"{num}"  
+#         new="".join(temp)
+#     else:
+#         new=fecha
+
+#     return new
+
+# fechas=[]
+# for i in range(len(bd_fechas)):
+#     #16/07/2022
+#     ids=id[i][0]
+
+#     año=int(bd_fechas[i][0][6:10])
+#     mes=int(limpiarFechas(bd_fechas[i][0][3:5]))
+#     dia=int(limpiarFechas(bd_fechas[i][0][0:2]))
+
+#     cur.execute("UPDATE comentarios SET fecha=? WHERE id=?",(date(año,mes,dia),ids,))
+    
+# #Ingresan comentarios
 # dbComentarios(comentario=[
 #     (None,"1","	El menú excelente y barato! 100% recomendable,el servicio rápido la gente amable y la comida exquisita! El secreto está increíble !!!","11/08/2022"),
 #     (None,"1","Trato agradable, lo hemos visitado una sola vez y volveremos a repetir en breve, carrillada exquisita. Carta muy apetitosa. Para la próxima probaremos más cosas. Saludos","13/08/2022"),
@@ -82,7 +113,7 @@ def dbComentarios(comentario):
 
 # ])
 
-
+from datetime import date
 from textblob import TextBlob
 import re
 from unicodedata import normalize
@@ -206,19 +237,10 @@ class Usuario:
         self.apodo=apodo
     
     def enviarComentario(self,restaurante:str,comentario:str):
+        # date(año,mes,dia)
         pass
 
     def infoRestaurante(self,restaurante:Restaurante):
         pass
     
-    
-
-#mejor guardar las palabar en plurar para evitar errores en la busqueda
-
-
-
-# class Usuario:
-#     def __init__(self,id:str,apodo:str,) -> None:
-#         self.id=id
-#         self.apodo=apodo
     
