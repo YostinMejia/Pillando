@@ -1,4 +1,4 @@
-from itertools import product
+import imp
 import sqlite3 as sql
 
 con=sql.connect("database.db")
@@ -83,10 +83,10 @@ def dbComentarios(comentario):
 # ])
 
 
-# from textblob import TextBlob
+from textblob import TextBlob
 import re
 from unicodedata import normalize
-
+import matplotlib.pyplot as mtp
 
 #Limpia el str antes de hacer un select a la bd
 def limpiarStr(palabra):
@@ -131,52 +131,71 @@ def buscarProducto(producto):
         producto=limpiarStr(input("-> "))
         buscarProducto(producto)
 
-
+#El usuario puede crear un objeto restaurante y este se puede almacenar en un json para no repetirlo
 class Restaurante:
 
-    def __init__(self,id:str,nombre="",productos=[],ubicacion="",horario="",calificacion=0,comentarios=[]) -> None:
+    def __init__(self,id:str) -> None:
+        self.id=str(id)
+
+        #Se guardan los datos basicos que estan en la tabla restaurante
+        cur.execute(f"SELECT * FROM restaurante WHERE id=?",(f"{self.id}",))
+        datos=cur.fetchall()
+        # if datos==[]:
+        #     print("El nombre no es válido \n Ingrese uno valido")
+        #     self.id=input("->: ")
+        #     don_beto=Restaurante(self.id)
         
-        self.id=id
-        self.nombre=nombre
+        self.nombre=datos[0][1]
+        self.ubicacion=datos[0][3]
+        self.horario=datos[0][4]
+
+        #Se guardan los productos de la tabla productos
+        cur.execute(f"SELECT * FROM productos WHERE id_restaurante=?",(f"{self.id}",))
+        productos=cur.fetchall()
         self.productos=productos
-        self.ubicacion=ubicacion
-        self.horario=horario
-        self.calificacion=calificacion
+            
+        #Se guardan los comentarios
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+        comentarios=cur.fetchall()
         self.comentarios=comentarios
 
-        cur.execute(f"SELECT * FROM restaurante WHERE id={id}")
-        datos=cur.fetchall()
-        print(datos)
+        #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
+        self.calificacion=0
         
 
-    def Ubicacion(self):
+    def mirarUbicacion(self):
         cur.execute("SELECT ubicacion FROM restaurante")
         ubicacion=cur.fetchone()
-        print(f" {self.nombre} queda en el {ubicacion}")
+        print(f" {self.nombre} queda en el {ubicacion[0]}")
     
-    def Horario(self):
+    def mirarHorario(self):
         cur.execute("SELECT horario FROM restaurante")
         horario=cur.fetchone()
-        print(f"{self.nombre} tiene un horario de {horario}")
+        print(f"{self.nombre} tiene un horario de {horario[0]}")
 
-    def Calificacion(self):
-        cur.execute(f"SELECT * FROM comentarios WHERE id_restaurante={self.id}")
+    def mirarCalificacion(self):
+        
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
         comentarios=cur.fetchall()
-        print(comentarios)
+        self.comentarios=comentarios
+        
         #Graficar la calificacion por medio de fechas
         #utilizar el analisis de sentimientos
 
     def mirarComentarios(self):
         
-        cur.execute("SELECT * FROM comentarios WHERE restaurante LIKE ?",(f"{self.nombre}%",))
+        cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
         lista_comentarios=cur.fetchall()
 
-        if len(lista_comentarios)==0:
+        if lista_comentarios==[]:
             print("No hay comentarios")
         else:
             self.comentarios=lista_comentarios
-    
+            for i in lista_comentarios:
+                print(i[0],f"Publicado el {i[1]}\n")
+
 don_beto=Restaurante("1")
+
 
 class Usuario:
     def __init__(self,id,apodo) -> None:
