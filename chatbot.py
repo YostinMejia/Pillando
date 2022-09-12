@@ -162,6 +162,8 @@ class Restaurante:
         #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
         self.calificacion=0
         
+    def buscarProducto(self):
+        pass
 
     def mirarUbicacion(self):
         cur.execute("SELECT ubicacion FROM restaurante")
@@ -194,6 +196,7 @@ class Restaurante:
             for i in lista_comentarios:
                 print(i[0],f"Publicado el {i[1]}\n")
 
+        
 don_beto=Restaurante("1")
 
 
