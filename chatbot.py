@@ -21,6 +21,7 @@ def dbComentarios(comentario):
     con.commit()
     cur.close()
 
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from datetime import date
 from textblob import TextBlob
 import re
@@ -113,8 +114,17 @@ class Restaurante:
         
         cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
         comentarios=cur.fetchall()
+        # print(comentarios)
         self.comentarios=comentarios
+        calificacion=0
+        for i in range(len(comentarios)):
+            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
+            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
+            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
+
+        calificacion/=len(comentarios) #Se halla el promedio
         
+        print("la calificacion",calificacion)
         #Graficar la calificacion por medio de fechas
         #utilizar el analisis de sentimientos
 
@@ -131,6 +141,7 @@ class Restaurante:
                 print(i[0],f"Publicado el {i[1]}\n")
 
 don_beto=Restaurante("1")
+don_beto.mirarCalificacion()
 
 class Usuario:
     def __init__(self,id,apodo) -> None:
