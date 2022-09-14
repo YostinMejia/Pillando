@@ -1,5 +1,22 @@
 consultas sql 
 
+def dbRestaurante(restaurante):   
+    #qmark style 
+    cur.executemany("INSERT INTO restaurante VALUES(?,?,?,?,?,?,?)",restaurante)
+    con.commit()
+    con.close()
+
+def dbProductos(productos):
+    #qmark style
+    cur.executemany("INSERT INTO productos VALUES(?,?,?,?,?,?)",productos)
+    con.commit()
+    cur.close()
+
+def dbComentarios(comentario):
+    #qmark style
+    cur.executemany("INSERT INTO comentarios VALUES(?,?,?,?)",comentario)
+    con.commit()
+    cur.close()
 # cur.execute("SELECT fecha FROM comentarios")
 # bd_fechas=cur.fetchall()
 # cur.execute("SELECT id FROM comentarios")
