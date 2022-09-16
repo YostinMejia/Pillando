@@ -1,3 +1,4 @@
+from ast import Str
 import sqlite3 as sql
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from datetime import date
@@ -35,11 +36,9 @@ class Restaurante:
         self.horario=datos[0][4]
 
         #Se guardan los productos de la tabla productos
-        productos=cur.fetchall()
         self.productos=productos
             
         #Se guardan los comentarios
-        comentarios=cur.fetchall()
         self.comentarios=comentarios
 
         #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
@@ -102,12 +101,12 @@ class Restaurante:
     def mirarUbicacion(self):
         cur.execute("SELECT ubicacion FROM restaurante")
         ubicacion=cur.fetchall()
-        print(f" {self.nombre} queda en el {ubicacion[0]}")
+        return (f" {self.nombre} queda en el {ubicacion[0]}")
     
     def mirarHorario(self):
         cur.execute("SELECT horario FROM restaurante")
         horario=cur.fetchall()
-        print(f"{self.nombre} tiene un horario de {horario[0]}")
+        return (f"{self.nombre} tiene un horario de {horario[0]}")
 
     def mirarCalificacion(self):
         
@@ -130,19 +129,24 @@ class Restaurante:
 
         #Se halla el promedio
         calificacion/=len(comentarios)
+        self.calificacion=calificacion
+
+
         if calificacion>=0.4:
-            if calificacion<=0.6:
+            if calificacion<=0.55:
+                calificacion="★ ★ ☆"
+            elif calificacion>=0.55 and calificacion<=0.6:
                 calificacion="★ ★ ★"
-            elif calificacion>0.6 and calificacion>0.6:
-                calificacion="★ ★ ★ ★"
+            elif calificacion>=0.6 and calificacion<=0.7:
+                calificacion="★ ★ ★ ☆"
             else:
                 calificacion="★ ★ ★ ★ ★"
-        elif calificacion <=-0.2:
-            calificacion="☆"
         else:
-            calificacion="★ ★ ☆"
-        
-        print(calificacion)
+            if calificacion>-0.5:
+                calificacion="☆ "
+            else:
+                calificacion="🗑️"
+
         #Config para graficar
         mtp.style.use(['dark_background'])
         mtp.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre}")
@@ -152,6 +156,7 @@ class Restaurante:
         mtp.title(f"Calificación comentarios")
         mtp.show()
 
+        return(calificacion)
 
     def mirarComentarios(self):
         
@@ -190,15 +195,70 @@ class Restaurante:
 # esquina.mirarCalificacion()
 
 class Usuario:
-    def __init__(self,id,apodo) -> None:
+    def __init__(self,id:str,apodo:str,nombre:str,carrera:str,comentarios=[]) -> None:
         self.id=id
         self.apodo=apodo
-    
-    def enviarComentario(self,restaurante:str,comentario:str):
-        # date(año,mes,dia)
+        self.nombre=nombre
+        self.carerra=carrera
+        self.comentarios=comentarios
+        
+    def enviarComentario(self,id_restaurante:str,comentario:str):
+        #qmark style
+        comentario=(None,id_restaurante,comentario,date.today(),self.id),
+
+        #qmark style
+        cur.executemany("INSERT INTO comentarios VALUES(?,?,?,?,?)",comentario)
+        con.commit()
+        cur.close()
         pass
 
-    def infoRestaurante(self,restaurante:Restaurante):
+    def infoRestaurante(self,id_restaurante:Restaurante,info:str):
         pass
+
+class Administrador:
+    def __init__(self,id:str,nombre:str) -> None:
+        self.id=id
+        self.nombre=nombre
+
+    def agregarRestaurante(self,nombre:str,productos:list,ubicacion:str,calificacion:int,horario:str,comentarios:list)-> None:
+
+        #qmark style 
+        restaurante=(None,nombre,"",ubicacion,0,horario,""),
+        cur.executemany("INSERT INTO restaurante VALUES(?,?,?,?,?,?,?)",restaurante)
+        con.commit()
+        con.close()
+        # if comentarios!=None:
     
-    
+    def actualizarProductos(self,opcion:str,id_producto=None,prod_nombre=None,prod_precio=None,prod_descripcion=None,prod_alias=None)-> None:
+        #si la opcion es "1" es porque se va a agregar un producto
+        #si es "2" se va a actualizar info del producto
+        # if opcion=="1":
+
+        #id nombre id_restaurante precio descripcion(opcional) alias(si tiene algun nombre propio del local)
+        # productos=(None,nombre,id_restaurante,precio,descripcion,alias),
+
+        #qmark style
+        # cur.executemany("INSERT INTO productos VALUES(?,?,?,?,?,?)",productos)
+        # con.commit()
+        # cur.close()
+        pass
+
+    def actualizarUbicacion(self,id_restaurante,ubicacion)-> None:
+        pass
+
+    def actualizarHorario(self,id_restaurante,horario)-> None:
+        # comentario=(None,id_restaurante,comentario),
+
+        # #qmark style
+        # cur.executemany("INSERT INTO comentarios VALUES(?,?)",comentario)
+        # con.commit()
+        # cur.close()
+        pass
+
+    def eliminarComentarios(self,id_comentario:str)-> None:
+
+        #qmark style
+        cur.executemany("DELETE FROM comentarios WHERE id= ? ",(id_comentario,))
+        con.commit()
+        cur.close()
+
