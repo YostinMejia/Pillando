@@ -72,7 +72,6 @@ class Administrador:
         descripcion=producto[0][4] #3
         alias=producto[0][5] #4
         
-        print("cambiando la descripcion de",nombre)
         if cambio=="1":
             nombre=input("Nuevo nombre: ")
             nombre=limpiarStr(nombre)
@@ -82,7 +81,13 @@ class Administrador:
             descripcion=input("Nueva descripcion: ")
         elif cambio=="4":
             alias=input("Nuevo alias: ")
-        
+        #Eliminar producto por id
+        elif cambio=="5":
+            eliminar=input("id del producto a eliminar: ")
+            eliminar=limpiarStr(eliminar)
+            cur.execute("DELETE FROM productos WHERE id=? ",(eliminar,))
+            print("Producto eliminado")
+
         actualizacion=(nombre,precio,descripcion,alias,id,)
         
 

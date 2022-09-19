@@ -32,7 +32,7 @@ class Restaurante:
         cur.execute(f"SELECT * FROM restaurante WHERE id=?",(self.id,))
         datos=cur.fetchall()
         self.nombre=datos[0][1]
-        self.ubicacion=datos[0][3]
+        self.ubicacion=datos[0][2]
         self.horario=datos[0][4]
 
         #Se guardan los productos de la tabla productos
@@ -79,7 +79,7 @@ class Restaurante:
                         else:
                             print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en \n{self.nombre} {self.ubicacion}.")
                 else:
-                    print(f"Le toco salir de la u a buscar porque aquí no hay {eleccion}")
+                    print(f"Le toco salir de la universidad a buscar porque aquí no hay {eleccion}")
                      
 
     def mirarUbicacion(self):
