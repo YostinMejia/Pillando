@@ -111,6 +111,4 @@ class Administrador:
         cur.executemany("DELETE FROM comentarios WHERE id= ? ",(id_comentario,))
         print("Comentario eliminado")
         con.commit()
-         
-
- 
+        
