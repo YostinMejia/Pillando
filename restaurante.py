@@ -50,37 +50,62 @@ class Restaurante:
     
         cur.execute("SELECT * FROM productos WHERE id_restaurante= ? and (nombre LIKE ? OR alias LIKE ?)",(f"{self.id}",f"{eleccion}%",f"{eleccion}%",))
         productos=cur.fetchall()
-        
+
+        #Si sen encuentra el producto en local solicitado
         if len(productos)!=0:
+
             for i in range(len(productos)):
                 if productos[i][4]!=None:
                     if productos[i][5]!=None:
-                        print(f"{productos[i][5]} cuesta {productos[i][3]}, esta disponible en {self.ubicacion}. \n descripción: {productos[i][4]} ")
+                        print(f"{productos[i][5]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]} ")
                     else:
-                        print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.ubicacion}. \n descripción: {productos[i][4]}")
+                        print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]}")
                 else:
-                    print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.ubicacion}.")
+                    print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}.")
+        
+        #Si no en encuentra
         else:
-            print(f"Este producto no está disponible en {self.nombre}")
+            #Se recorta la palabra y se vulve a buscar en el mismo local
+            tamano=len(eleccion)
+            eleccion2=eleccion
+            eleccion=eleccion[0:(tamano//2)]
+            cur.execute("SELECT * FROM productos WHERE id_restaurante= ? and (nombre LIKE ? OR alias LIKE ?)",(f"{self.id}",f"{eleccion}%",f"{eleccion}%",))
+            productos=cur.fetchall()
 
-            pregunta=input("¿Desea ver si esta disponible en otro local?-> ")
-            pregunta=limpiarStr(pregunta).lower()
-            #Solo se controla si escribe "si" -----------------------------chatobot-----------------------------
-            if pregunta=="si":
-                cur.execute("SELECT * FROM productos WHERE nombre LIKE ? OR alias LIKE ?",(f"{eleccion}%",f"{eleccion}%",))
-                productos=cur.fetchall()
-                if len(productos)!=0:
-                    for i in range(len(productos)):
-                        if productos[i][4]!=None:
-                            if productos[i][5]!=None:
-                                print(f"{productos[i][5]} cuesta {productos[i][3]} y está disponible en \n{self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]} ")
+            #si no se encuentra nada en el local solicitado
+            if len(productos)==0:
+                print(f"{eleccion2} no está disponible en {self.nombre}")
+
+                pregunta=input("¿Desea ver si esta disponible en otro local?-> ")
+                pregunta=limpiarStr(pregunta).lower()
+                #Solo se controla si escribe "si" -----------------------------chatobot-----------------------------
+                #Si desea buscar en todos los locales
+                if pregunta=="si":
+                    cur.execute("SELECT * FROM productos WHERE nombre LIKE ? OR alias LIKE ?",(f"{eleccion}%",f"{eleccion}%",))
+                    productos=cur.fetchall()
+
+                    #Si se encuentra el producto en cualquier local
+                    if len(productos)!=0:
+
+                        for i in range(len(productos)):
+
+                            # Se busca el(los) nombre(s) del restaurante que lo tiene y su ubicacion
+                            id_restaurante=productos[i][2]
+                            cur.execute("SELECT nombre,ubicacion FROM restaurante WHERE id=?",(id_restaurante,))
+                            restaurante=cur.fetchall()
+
+                            if productos[i][4]!=None:
+                                if productos[i][5]!=None:
+                                    print(f"{productos[i][5]} cuesta {productos[i][3]} y está disponible en  \n{restaurante[0][0]} {restaurante[0][1]}. \n descripción: {productos[i][4]} \n")
+                                else:
+                                    print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en  \n{restaurante[0][0]} {restaurante[0][1]}. \n descripción: {productos[i][4]} \n")
                             else:
-                                print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en \n{self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]}")
-                        else:
-                            print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en \n{self.nombre} {self.ubicacion}.")
-                else:
-                    print(f"Le toco salir de la universidad a buscar porque aquí no hay {eleccion}")
-                     
+                                print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en \n{restaurante[0][0]} {restaurante[0][1]}. \n")
+                    
+                    #Si no se encuentra nada en ningun local
+                    else:
+                        print(f"Le toco salir de la universidad a buscar porque aquí no hay {eleccion2}")
+            
 
     def mirarUbicacion(self):
         cur.execute("SELECT ubicacion FROM restaurante")
@@ -102,9 +127,11 @@ class Restaurante:
         reseña=[]
         fechas=[]
         for i in range(len(comentarios)):
-
+            
             txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
             analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
+            print(txt)
+            print(analisis)
             calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
 
             #append para graficar
@@ -130,7 +157,7 @@ class Restaurante:
             else:
                 calificacion="🗑️"
 
-        print(calificacion)
+        print (calificacion)
 
         #Config para graficar
         mtp.style.use(['dark_background'])
@@ -140,6 +167,8 @@ class Restaurante:
         mtp.ylabel("CALIFICACIÓN")
         mtp.title(f"Calificación comentarios")
         mtp.show()
+
+        
 
 
     def mirarComentarios(self):
