@@ -130,8 +130,6 @@ class Restaurante:
             
             txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
             analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
-            print(txt)
-            print(analisis)
             calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
 
             #append para graficar
@@ -144,20 +142,20 @@ class Restaurante:
 
         if calificacion>=0.4:
             if calificacion<=0.55:
-                calificacion="★ ★ ☆"
+                estrellas="★ ★ ☆"
             elif calificacion>=0.55 and calificacion<=0.6:
-                calificacion="★ ★ ★"
+                estrellas="★ ★ ★"
             elif calificacion>=0.6 and calificacion<=0.7:
-                calificacion="★ ★ ★ ☆"
+                estrellas="★ ★ ★ ☆"
             else:
-                calificacion="★ ★ ★ ★ ★"
+                estrellas="★ ★ ★ ★ ★"
         else:
             if calificacion>-0.5:
-                calificacion="☆ "
+                estrellas="☆ "
             else:
-                calificacion="🗑️"
+                estrellas="🗑️"
 
-        print (calificacion)
+        print(estrellas)
 
         #Config para graficar
         mtp.style.use(['dark_background'])
@@ -167,8 +165,8 @@ class Restaurante:
         mtp.ylabel("CALIFICACIÓN")
         mtp.title(f"Calificación comentarios")
         mtp.show()
-
         
+        return calificacion
 
 
     def mirarComentarios(self):

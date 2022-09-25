@@ -1,5 +1,6 @@
 from datetime import date
 import sqlite3 as sql
+from traceback import print_tb
 
 from restaurante import *
 
@@ -17,98 +18,120 @@ class Usuario:
         
     def enviarComentario(self,id_restaurante:str,comentario:str)-> None:
         #qmark style
-        comentario=(None,id_restaurante,comentario,date.today(),self.id),
+        comentario=(None,id_restaurante,comentario,date.today(),)
 
         #qmark style
-        cur.executemany("INSERT INTO comentarios VALUES(?,?,?,?,?)",comentario)
+        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?)",comentario)
         print("Comentario enviado")
-
         con.commit()
-         
-        
     
     #--------------------Hay que mirar que el chat bot revise los id y según el nombre que arroje el ususario ponga los id----------------------
 
-    def infoRestaurante(self,id_restaurante:Restaurante,info:str)-> None:
+    def infoRestaurante(self,id_restaurante:str,info:str)-> None:
 
         obj_temp=Restaurante(str(id_restaurante))
         info=str(info)
-        if info=="1":#Productos
-            producto=input("¿cual producto desea buscar?: ")
-            obj_temp.mirarProductos(producto)
-        elif info=="2": #comentarios
-            obj_temp.mirarComentarios()
-        elif info=="3": #calificacion
-            obj_temp.mirarCalificacion()
-        elif info=="4": #horario
-            obj_temp.mirarHorario()
-        elif info=="5": #ubicacion
-            obj_temp.mirarUbicacion()
-        
 
-class Administrador:
+        if info=="comentarios": #comentarios
+            obj_temp.mirarComentarios()
+        elif info=="calificacion": #calificacion
+            obj_temp.mirarCalificacion()
+        elif info=="horario": #horario
+            obj_temp.mirarHorario()
+        elif info=="ubicacion": #ubicacion
+            obj_temp.mirarUbicacion()
+    
+    def buscarProducto(self,id_restaurante:str,producto:str):
+        obj_temp=Restaurante(id_restaurante)
+        obj_temp.mirarProductos(producto)
+  
+
+class Administrador():
     def __init__(self,id:str,nombre:str) -> None:
         self.id=id
         self.nombre=nombre
 
-    def agregarRestaurante(self,nombre:str,productos:list,ubicacion:str,calificacion:int,horario:str,comentarios:list)-> None:
+    def agregarRestaurante(self,nombre:str,ubicacion:str,horario:str)-> None:
 
         #qmark style 
-        restaurante=(None,nombre,"",ubicacion,0,horario,""),
-        cur.executemany("INSERT INTO restaurante VALUES(?,?,?,?,?,?,?)",restaurante)
+        restaurante=(None,nombre,ubicacion,0,horario,)
+        cur.execute("INSERT INTO restaurante VALUES(?,?,?,?,?)",restaurante)
         print("Restaurante ingresado")
         con.commit()
-        # if comentarios!=None:
-    
-    def actualizarProductos(self,id_producto:str,cambio:str)-> None:
+
+
+    def eliminarComentarios(self,comentario:str)-> None:
+        cur.execute("DELETE FROM comentarios WHERE id= ?",(f"{comentario}",))
+        con.commit()
+        print("Comentario eliminado")
+        # cur.execute("SELECT * FROM comentarios WHERE id=?",(f"{id_comentario}",))
+        # dato=cur.fetchall()
+        # print(dato)
         
-        cur.execute("SELECT * FROM productos WHERE id=? ",(id_producto,))
+class AdminLocal:
+
+    def __init__(self,id_restaurante:str) -> None:
+        self.id_restaurante:str=id_restaurante
+
+    def agregarProducto(self,prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
+
+        producto=(None,prod_nombre,self.id_restaurante,prod_precio,prod_descripcion,prod_alias,)
+        
+        cur.execute("INSERT INTO productos VALUES(?,?,?,?,?,?)",producto)
+        con.commit()
+        print("Producto Agregado")
+        
+    
+    def actualizarProductos(self,id:str,dato:str,cambio:str)-> None:
+        
+        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{id}",))
         producto=cur.fetchall()
-        id=producto[0][0]
-        id_restaurante=producto[0][2] 
 
         nombre=producto[0][1] #1
         precio=producto[0][3] #2
         descripcion=producto[0][4] #3
         alias=producto[0][5] #4
         
-        if cambio=="1":
-            nombre=input("Nuevo nombre: ")
-            nombre=limpiarStr(nombre)
-        elif cambio=="2":
-            precio=input(input("Nuevo precio: "))
-        elif cambio=="3":
-            descripcion=input("Nueva descripcion: ")
-        elif cambio=="4":
-            alias=input("Nuevo alias: ")
+        if dato!="eliminar":
+
+            if dato=="nombre":
+                nombre=limpiarStr(nombre)
+                nombre=cambio
+            elif dato=="precio":
+                precio=int(cambio)
+            elif dato=="descripcion":
+                descripcion=cambio
+            elif dato=="alias":
+                alias=cambio
+            
+            else:
+                cambio=input("Digite un cambio valido: ")
+                self.actualizarProductos(id,cambio)
+
+            #Se aplica el cambio seleccionado
+            actualizacion=(nombre,precio,descripcion,alias,id,)
+            cur.execute("UPDATE productos SET nombre=? , precio=?, descripcion=?, alias=? WHERE id=? ",actualizacion)
+            con.commit()
+            print("producto actualizado")
+        
         #Eliminar producto por id
-        elif cambio=="5":
-            eliminar=input("id del producto a eliminar: ")
-            eliminar=limpiarStr(eliminar)
-            cur.execute("DELETE FROM productos WHERE id=? ",(eliminar,))
+        else:
+            cur.execute("DELETE FROM productos WHERE id=? ",(f"{id}"),)
+            con.commit()
             print("Producto eliminado")
-
-        actualizacion=(nombre,precio,descripcion,alias,id,)
         
+    def cambiarInfoRestaurante(self,dato:str,cambio:str):
 
-        cur.execute("UPDATE productos SET nombre=? , precio=?, descripcion=?, alias=? WHERE id=? ",actualizacion)
-        print("producto actualizado")
-
-        con.commit()
-         
-        
-    def ingresarProducto(self,prod_nombre:str,id_restaurante:str,prod_precio:int,prod_descripcion:str,prod_alias:str)-> None:
-
-        # id nombre id_restaurante precio descripcion(opcional) alias(si tiene algun nombre propio del local)
-        productos=(None,prod_nombre,id_restaurante,prod_precio,prod_descripcion,prod_alias,)  
-        cur.execute("INSERT INTO productos VALUES(?,?,?,?,?,?)",productos)
-        print("Producto Agregado")
-        con.commit()
-         
-
-    def eliminarComentarios(self,id_comentario:str)-> None:
-
-        cur.executemany("DELETE FROM comentarios WHERE id= ? ",(id_comentario,))
-        print("Comentario eliminado")
-        con.commit()
-        
+        if dato=="nombre":
+            cur.execute("UPDATE restaurante SET nombre=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            con.commit()
+        elif dato=="ubicacion":
+            cur.execute("UPDATE restaurante SET ubicacion=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            con.commit()
+        elif dato=="horario":
+            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            con.commit()
+    
+    def mirarCalificacion(self):
+        obj_temp=Restaurante(self.id_restaurante)
+        obj_temp.mirarCalificacion()
