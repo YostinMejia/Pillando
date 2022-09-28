@@ -5,6 +5,7 @@ import matplotlib.pyplot as mtp
 from textblob import TextBlob
 from unicodedata import normalize
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from translate import Translator
 
 
 #Inicia coneccion con la bd
@@ -180,3 +181,58 @@ class Restaurante:
             self.comentarios=lista_comentarios
             for i in lista_comentarios:
                 print(i[0],f"Publicado el {i[1]}\n")
+
+
+    #Se mira también la palabra más repetida 
+    def mirarComentariosAdmin(self,palabra=False):
+
+        cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+        lista_comentarios=cur.fetchall()
+
+        repetidas={}
+        #Algunas de las palabras que no evalua el sentiemiento deseado
+        palabras_clave=["barato","caro","costoso","carísimo","baratisimo","valioso","económico","rebajado",
+        "increíble","volveremos","exquisita","exquisito","apretados","llena","lleno","recomendable","ricos","gustó"]
+        
+        if lista_comentarios==[]:
+            print("No hay comentarios")
+        else:
+
+            if palabra==False:
+                self.comentarios=lista_comentarios
+                repetidas={}
+                #Se miran todas las palabras y se guarda cuantas veces estan repetidas
+                for i in lista_comentarios:
+                    print(i[0],f"Publicado el {i[1]}\n")
+                    contando=TextBlob(i[0])
+                    contando=contando.word_counts
+                    llaves=list(contando.keys())
+                    for i in llaves:
+
+                        # Se evalua el sentimiento para guardar solamente las palbaras no neutrales 
+                        print(i,end=" ")
+                        palabra=Translator(from_lang="es", to_lang="en").translate(i) #Se traduce cada comentario
+                        print(palabra,end=" ")
+                        analisis=SentimentIntensityAnalyzer().polarity_scores(palabra) #Se analizan los sentimientos
+                        print(analisis["compound"]) #Se le asigna el valor arrojado por el analisis 
+
+                        #se mira que no sea una palabra neeutral o que este en palabras_claves
+                        if analisis["compound"] > 0.1 or analisis["compound"] < -0.1 or (i in palabras_clave): 
+
+                            if i in repetidas: #Se guardan las palabras 
+                                repetidas[i]+=contando[i]
+                            else:
+                                repetidas[i]=contando[i]
+                print(repetidas)
+            else:
+                repetidas={}
+                #Se miran todas las palabras y se guarda cuantas veces estan repetidas
+                for i in lista_comentarios:
+                    print(i[0])
+                    contando=TextBlob(i[0])
+                    contando=contando.word_counts[palabra]
+                    print(contando)
+                    # repetidas[i]=contando[i]
+                # print(repetidas)
+
+                
