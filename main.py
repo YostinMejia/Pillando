@@ -27,7 +27,8 @@ if __name__=="__main__":
     # # Id producto y tipo de cambio
     adminLocal=AdminLocal("1")
     # adminLocal.mirarCalificacion()
-    adminLocal.mirarComentarios()
+    adminLocal.mirarComentarios(["pica","excelente"])    
+    # adminLocal.mirarComentarios()
 
     # adminLocal.agregarProducto("papas con unicornio",15000,"Ey muy buenas a todos guapisimos","Vicente")
     # print()

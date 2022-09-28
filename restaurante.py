@@ -226,13 +226,16 @@ class Restaurante:
                 print(repetidas)
             else:
                 repetidas={}
-                #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                 for i in lista_comentarios:
-                    print(i[0])
+                #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                     contando=TextBlob(i[0])
-                    contando=contando.word_counts[palabra]
-                    print(contando)
-                    # repetidas[i]=contando[i]
-                # print(repetidas)
+
+                    for j in range(len(palabra)):
+                        count=contando.word_counts[palabra[j]]
+                        if palabra[j] in repetidas: #Se guardan las palabras 
+                            repetidas[palabra[j]]+=count
+                        else:
+                            repetidas[palabra[j]]=count
+                print(repetidas)
 
                 
