@@ -145,10 +145,16 @@ class AdminLocal:
         mtp.title(f"Calificación comentarios")
         mtp.show()
     
-    def mirarPalabrasRepetidas(self):
+    def mirarPalabrasRepetidas(self,actualizar=False,lista_palabras=None):
+        
+        if actualizar==True:
+            obj_temp=Restaurante(self.id_restaurante)
+            self.palabras_repetidas=obj_temp.palabrasRepetidas(lista_palabras)
+        
         return self.palabras_repetidas
+    
 
-    def mirarComentariosAdmin(self,palabra=False):
+    def mirarComentarios(self):
         obj_temp=Restaurante(self.id_restaurante)
-        self.palabras_repetidas=obj_temp.mirarComentariosAdmin(palabra)
-        return self.palabras_repetidas
+        return obj_temp.mirarComentarios()
+
