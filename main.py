@@ -30,6 +30,9 @@ if __name__=="__main__":
     adminLocal=AdminLocal("1")
 
     # print(adminLocal.mirarCalificacion())
+    print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"])) 
+    print(adminLocal.mirarPalabrasRepetidas())
+    
     print(adminLocal.mirarPalabrasRepetidas(True) )
     print(adminLocal.mirarPalabrasRepetidas())
     # adminLocal.mirarComentariosAdmin()
