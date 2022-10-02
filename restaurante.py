@@ -192,6 +192,6 @@ class Restaurante:
                     else:
                         repetidas[lista_palabras[j]]=count
 
-        # return repetidas
+        return repetidas
 
                 
