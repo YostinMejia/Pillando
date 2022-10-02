@@ -25,12 +25,34 @@ class Administrador():
         print("Comentario eliminado")
         # cur.execute("SELECT * FROM comentarios WHERE id=?",(f"{id_comentario}",))
         # dato=cur.fetchall()
-        # print(dato)
+        # print(dato)    
+
+    def actualizarCalificacion(self,id_restaurante):
+        
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+        comentarios=cur.fetchall()
+        calificacion=0
+
+        for i in range(len(comentarios)):
+            
+            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
+            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
+            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
+
+        #Se halla el promedio
+        calificacion/=len(comentarios)
+
+        datos=(calificacion,id_restaurante,)
+        cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
+        con.commit()
+
         
 class AdminLocal:
 
     def __init__(self,id_restaurante:str) -> None:
         self.id_restaurante:str=id_restaurante
+        
+        self.palabras_repetidas:dict={}
 
     def agregarProducto(self,prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
 
@@ -93,8 +115,40 @@ class AdminLocal:
     
     def mirarCalificacion(self):
         obj_temp=Restaurante(self.id_restaurante)
-        obj_temp.mirarCalificacion()
 
-    def mirarComentarios(self,palabra=False):
+        return obj_temp.mirarCalificacion()
+
+    def graficarCalificacion(self):
+
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+        comentarios=cur.fetchall()
+        calificacion=0
+
+        reseña=[]
+        fechas=[]
+        for i in range(len(comentarios)):
+            
+            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
+            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
+            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
+
+            #append para graficar
+            fechas.append(comentarios[i][1])
+            reseña.append(analisis["compound"])
+        
+                #Config para graficar
+        mtp.style.use(['dark_background'])
+        mtp.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre}")
+        mtp.legend()
+        mtp.xlabel("FECHA")
+        mtp.ylabel("CALIFICACIÓN")
+        mtp.title(f"Calificación comentarios")
+        mtp.show()
+    
+    def mirarPalabrasRepetidas(self):
+        return self.palabras_repetidas
+
+    def mirarComentariosAdmin(self,palabra=False):
         obj_temp=Restaurante(self.id_restaurante)
-        obj_temp.mirarComentariosAdmin(palabra)
+        self.palabras_repetidas=obj_temp.mirarComentariosAdmin(palabra)
+        return self.palabras_repetidas

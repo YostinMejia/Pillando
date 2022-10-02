@@ -20,15 +20,19 @@ if __name__=="__main__":
 
     # #Prueba administrador
     # admin=Administrador("1","juan")
+    # admin.actualizarCalificacion("1")
     # admin.agregarRestaurante("Care pinga","bloque 8","12:03am - 8:00 pm")
     # print()
     # admin.eliminarComentarios("31")
 
     # # Id producto y tipo de cambio
+    
     adminLocal=AdminLocal("1")
-    # adminLocal.mirarCalificacion()
-    adminLocal.mirarComentarios(["pica","excelente"])    
-    # adminLocal.mirarComentarios()
+
+    # print(adminLocal.mirarCalificacion())
+    # print(adminLocal.mirarComentariosAdmin(["pica","excelente"])) 
+    print(adminLocal.mirarComentariosAdmin())
+    # adminLocal.mirarComentariosAdmin()
 
     # adminLocal.agregarProducto("papas con unicornio",15000,"Ey muy buenas a todos guapisimos","Vicente")
     # print()
@@ -50,44 +54,3 @@ if __name__=="__main__":
     # print()
     # adminLocal2.cambiarInfoRestaurante("horario","6:00 am - 9:00pm")
     # print()
-
-
-    # don_beto=Restaurante("1")
-    # print()
-    # don_beto.mirarProductos("perro")
-    # print()
-
-    # panaderia_miguel=Restaurante("2")
-    # print()
-
-    # panaderia_miguel.mirarProductos("per")
-    # print()
-
-    # panaderia_miguel.mirarCalificacion()
-    # print()
-
-    # pregunte=Restaurante("3")
-    # print()
-
-    # pregunte.mirarProductos("jba")
-    # print()
-
-    # pregunte.mirarCalificacion()
-    # print()
-
-    # don_jose=Restaurante("4")
-    # print()
-
-    # don_jose.mirarProductos("sold")
-    # print()
-    # don_jose.mirarCalificacion()
-    # print()
-
-    # providencia=Restaurante("5")
-    # providencia.mirarProductos("salchip")
-    # providencia.mirarCalificacion()
-    # print()
-
-    # esquina=Restaurante("6")
-    # esquina.mirarProductos("hamburgueaxas")
-    # esquina.mirarCalificacion()

@@ -1,3 +1,6 @@
+"""Guardar los datos una sola vez y luego el administrador puede actualizar los comentarios y calificación, 
+para poder usar la herencia y no llamar todo de la base de datos, disminuir el tiempo de ejecución"""
+
 from datetime import date
 import sqlite3 as sql
 

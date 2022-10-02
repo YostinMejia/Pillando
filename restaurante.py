@@ -119,27 +119,9 @@ class Restaurante:
         print (f"{self.nombre} tiene un horario de {horario[0][0]}")
 
     def mirarCalificacion(self):
-        
-        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
-        comentarios=cur.fetchall()
-        self.comentarios=comentarios
-        calificacion=0
-
-        reseña=[]
-        fechas=[]
-        for i in range(len(comentarios)):
-            
-            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
-            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
-            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
-
-            #append para graficar
-            fechas.append(comentarios[i][1])
-            reseña.append(analisis["compound"])
-
-        #Se halla el promedio
-        calificacion/=len(comentarios)
-        self.calificacion=calificacion
+        cur.execute("SELECT calificacion FROM restaurante WHERE id=?",(f"{self.id}",))
+        calificacion=cur.fetchall()
+        calificacion=calificacion[0][0]
 
         if calificacion>=0.4:
             if calificacion<=0.55:
@@ -156,35 +138,19 @@ class Restaurante:
             else:
                 estrellas="🗑️"
 
-        print(estrellas)
+        return estrellas
 
-        #Config para graficar
-        mtp.style.use(['dark_background'])
-        mtp.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre}")
-        mtp.legend()
-        mtp.xlabel("FECHA")
-        mtp.ylabel("CALIFICACIÓN")
-        mtp.title(f"Calificación comentarios")
-        mtp.show()
+    def mirarComentarios(self,lista_comentarios=False):
         
-        return calificacion
+        if lista_comentarios==False:
+            cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+            lista_comentarios=cur.fetchall()
 
-
-    def mirarComentarios(self):
-        
-        cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
-        lista_comentarios=cur.fetchall()
-
-        if lista_comentarios==[]:
-            print("No hay comentarios")
-        else:
-            self.comentarios=lista_comentarios
-            for i in lista_comentarios:
-                print(i[0],f"Publicado el {i[1]}\n")
+        return lista_comentarios
 
 
     #Se mira también la palabra más repetida 
-    def mirarComentariosAdmin(self,palabra=False):
+    def mirarComentariosAdmin(self,buscar_palabras=False):
 
         cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
         lista_comentarios=cur.fetchall()
@@ -194,15 +160,20 @@ class Restaurante:
         #Algunas de las palabras que no evalua el sentiemiento deseado
         palabras_clave=["barato","caro","costoso","carísimo","baratisimo","valioso","económico","rebajado",
         "increíble","volveremos","exquisita","exquisito","apretados","llena","lleno","recomendable","ricos","gustó"]
+
         
-        if lista_comentarios==[]:
-            print("No hay comentarios")
-        else:
+        
+        if buscar_palabras==False:
+            
+            return self.mirarComentarios(lista_comentarios)
+
+        else:    
+            repetidas={}
             #Si no selecciono ninguna palabra en especifico
-            if palabra==False:
+            if type(buscar_palabras)!=type([]):
 
                 self.comentarios=lista_comentarios
-                repetidas={}
+                
                 #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                 for i in lista_comentarios:
                     print(i[0],f"Publicado el {i[1]}\n")
@@ -224,24 +195,21 @@ class Restaurante:
                                 repetidas[i]+=contando[i]
                             else:
                                 repetidas[i]=contando[i]
-                print(repetidas)
 
             #Si selecciono una o varias palabras se buscan
             else:
-                repetidas={}
                 for i in lista_comentarios:
                     print(i[0],f"Publicado el {i[1]}\n")
 
                 #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                     contando=TextBlob(i[0])
 
-                    for j in range(len(palabra)):
-                        count=contando.word_counts[palabra[j]]
-                        if palabra[j] in repetidas: #Se guardan las palabras 
-                            repetidas[palabra[j]]+=count
+                    for j in range(len(buscar_palabras)):
+                        count=contando.word_counts[buscar_palabras[j]]
+                        if buscar_palabras[j] in repetidas: #Se guardan las palabras 
+                            repetidas[buscar_palabras[j]]+=count
                         else:
-                            repetidas[palabra[j]]=count
-                            
-                print(repetidas)
+                            repetidas[buscar_palabras[j]]=count
+            return repetidas
 
                 
