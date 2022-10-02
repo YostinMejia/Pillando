@@ -30,11 +30,11 @@ if __name__=="__main__":
     adminLocal=AdminLocal("1")
 
     # print(adminLocal.mirarCalificacion())
-    print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"])) 
-    print(adminLocal.mirarPalabrasRepetidas())
-    
+    # print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"])) 
+    # print(adminLocal.mirarPalabrasRepetidas())
+
     print(adminLocal.mirarPalabrasRepetidas(True) )
-    print(adminLocal.mirarPalabrasRepetidas())
+    # print(adminLocal.mirarPalabrasRepetidas())
     # adminLocal.mirarComentariosAdmin()
 
     # adminLocal.agregarProducto("papas con unicornio",15000,"Ey muy buenas a todos guapisimos","Vicente")
