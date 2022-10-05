@@ -4,7 +4,7 @@ from administradores import *
 
 if __name__=="__main__":
     
-    juan=Usuario(1,"mejia","juan","estudiante")
+    # juan=Usuario(1,"mejia","juan","estudiante")
     # # id del restaurante y  tipo de informacion
     # juan.infoRestaurante("1","comentarios")
     # print()
@@ -16,7 +16,7 @@ if __name__=="__main__":
     # print()
     # juan.buscarProducto("1","hamburguesa")
     # print()
-    juan.enviarComentario("4","muy buena comida , me encantó")
+    # juan.enviarComentario("4","muy buena comida , me encantó")
 
     # #Prueba administrador
     # admin=Administrador("1","juan")
@@ -33,13 +33,13 @@ if __name__=="__main__":
 
     # # Id producto y tipo de cambio
     
-    # adminLocal=AdminLocal("lk2","1")
+    adminLocal=AdminLocal("lk2","1")
 
     # print(adminLocal.mirarCalificacion())
-    # print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"]))
-    # print(adminLocal.mirarPalabrasRepetidas())
+    # print(adminLocal.mirarPalabrasRepetidas(True,["malo","excelente"]))
+    # adminLocal.mirarPalabrasRepetidas() ##Se muestra solamente lo guardado previemente
     # adminLocal.graficarCalificacion()
-    # print(adminLocal.mirarPalabrasRepetidas(True) )
+    print(adminLocal.mirarPalabrasRepetidas(True) )
     # print(adminLocal.mirarPalabrasRepetidas())
     # adminLocal.mirarComentariosAdmin()
 
@@ -63,3 +63,5 @@ if __name__=="__main__":
     # print()
     # adminLocal2.cambiarInfoRestaurante("horario","6:00 am - 9:00pm")
     # print()
+
+    # beto=Restaurante("1",)

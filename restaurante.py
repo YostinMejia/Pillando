@@ -4,9 +4,11 @@ import re
 from textblob import TextBlob
 from unicodedata import normalize
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from translate import Translator
 
+import spacy
 
+#Cargamos Spacy en español
+nlp=spacy.load("es_core_news_lg")
 
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
@@ -151,43 +153,36 @@ class Restaurante:
     #Se mira también la palabra más repetida 
     def palabrasRepetidas(self,lista_palabras:list) -> dict:
         
-        lista_comentarios=self.mirarComentarios()
+        cur.execute("SELECT no_stop_words FROM comentarios")
+        lista_comentarios=cur.fetchall()
 
         repetidas={}
-        
-        #Algunas de las palabras que no evalua el sentiemiento deseado
-        palabras_clave=["barato","caro","costoso","carísimo","baratisimo","valioso","económico","rebajado",
-        "increíble","volveremos","exquisita","exquisito","apretados","llena","lleno","recomendable","ricos","gustó"]
 
         #Si no selecciono ninguna palabra en especifico
         if lista_palabras==None:
+
             #Se miran todas las palabras y se guarda cuantas veces estan repetidas
-            for i in lista_comentarios:
-
-                contando=TextBlob(i[0])
-                contando=contando.word_counts
-                llaves=list(contando.keys())
+            for i in range(len(lista_comentarios)):
                 
+                palabras=TextBlob(lista_comentarios[i][0])  #Se guarda el no stop words
+                contando=palabras.word_counts   #Se cuentan las palabras
+                llaves=list(contando.keys())
 
-                for i in llaves:
-
-                    # Se evalua el sentimiento para guardar solamente las palbaras no neutrales 
-                    palabra=Translator(from_lang="es", to_lang="en").translate(i) #Se traduce cada comentario
-                    analisis=SentimentIntensityAnalyzer().polarity_scores(palabra) #Se analizan los sentimientos
-
-                    #se mira que no sea una palabra neeutral o que este en palabras_claves
-                    if (analisis["compound"] > 0.1 or analisis["compound"] < -0.1) or (i in palabras_clave): 
-                        
+                # #Por primera vez, se pueden guardar todas las palabras ya que el dict repetidas está vacio
+                if i==0:
+                    repetidas=dict(contando)
+                else:    
+                    for j in llaves:
                         if i in repetidas: #Se guardan las palabras 
-                            repetidas[i]+=contando[i]
+                            repetidas[j]+=contando[j]
                         else:
-                            repetidas[i]=contando[i]
+                            repetidas[j]=contando[j]
                             
         #Si selecciono una o varias palabras se buscan
         else:
-            for i in lista_comentarios:
+            for i in range(len(lista_comentarios)):
             #Se miran todas las palabras y se guarda cuantas veces estan repetidas
-                contando=TextBlob(i[0])
+                contando=TextBlob(lista_comentarios[i][0])
                 for j in range(len(lista_palabras)):
                     count=contando.word_counts[lista_palabras[j]]
                     if lista_palabras[j] in repetidas: #Se guardan las palabras 

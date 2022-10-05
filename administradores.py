@@ -85,7 +85,9 @@ class Administrador():
                     if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
                         limpiado.append(i.text) 
                 limpiado=" ".join(limpiado) #Se convierte a string
+                
                 enviar=(analisis["compound"],limpiado,id_comentario,)
+
                 #qmark style
                 cur.execute("UPDATE comentarios SET calificacion=? , no_stop_words=? WHERE id=? ",enviar)
                 con.commit()
