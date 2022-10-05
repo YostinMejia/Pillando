@@ -61,6 +61,9 @@ class Administrador():
 
     #Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos
     #Por lo que se debe de mirar que no arroje el mismo "compound" en todos los comentarios
+    
+    """Hay que mirar que si se este traduciendo y no se haya agotado la memoria TRY EXCEPT"""
+
     def actualizarCalificacionComentarios(self, id_restaurante:str):
         #qmark style
         cur.execute("SELECT id,comentario,no_stop_words FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
@@ -82,7 +85,7 @@ class Administrador():
             # Si ya está no_stop_word entonces no se actualiza
             if datos[i][2]==None:
                 for i in comentario:
-                    if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
+                    if (not i.is_stop and not i.is_punct and not i.is_digit): # Se buscan stop words , caracteres especiales números
                         limpiado.append(i.text) 
                 limpiado=" ".join(limpiado) #Se convierte a string
                 
@@ -214,4 +217,3 @@ class AdminLocal:
     def mirarComentarios(self):
         obj_temp=Restaurante(self.id_restaurante)
         return obj_temp.mirarComentarios()
-

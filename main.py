@@ -19,7 +19,7 @@ if __name__=="__main__":
     # juan.enviarComentario("4","muy buena comida , me encantó")
 
     # #Prueba administrador
-    # admin=Administrador("1","juan")
+    admin=Administrador("1","juan")
     # admin.actualizarCalificacionRestaurante("6")
     # admin.actualizarCalificacionRestaurante("4")
 
@@ -33,14 +33,14 @@ if __name__=="__main__":
 
     # # Id producto y tipo de cambio
     
-    adminLocal=AdminLocal("lk2","1")
+    # adminLocal=AdminLocal("lk2","1")
 
     # print(adminLocal.mirarCalificacion())
     # print(adminLocal.mirarPalabrasRepetidas(True,["malo","excelente"]))
     # adminLocal.mirarPalabrasRepetidas() ##Se muestra solamente lo guardado previemente
     # adminLocal.graficarCalificacion()
-    print(adminLocal.mirarPalabrasRepetidas(True) )
-    # print(adminLocal.mirarPalabrasRepetidas())
+    # print(adminLocal.mirarPalabrasRepetidas(True) ) #Se buscan todas las no stop words y se cuentan 
+    # print(adminLocal.mirarPalabrasRepetidas()) ##Se muestra solamente lo guardado previemente
     # adminLocal.mirarComentariosAdmin()
 
     # adminLocal.agregarProducto("papas con unicornio",15000,"Ey muy buenas a todos guapisimos","Vicente")

@@ -151,6 +151,9 @@ class Restaurante:
 
 
     #Se mira también la palabra más repetida 
+
+    """Hay que mirar si quiere una cantidad minima de palabras"""
+    
     def palabrasRepetidas(self,lista_palabras:list) -> dict:
         
         cur.execute("SELECT no_stop_words FROM comentarios")
@@ -183,8 +186,10 @@ class Restaurante:
             for i in range(len(lista_comentarios)):
             #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                 contando=TextBlob(lista_comentarios[i][0])
+
                 for j in range(len(lista_palabras)):
                     count=contando.word_counts[lista_palabras[j]]
+
                     if lista_palabras[j] in repetidas: #Se guardan las palabras 
                         repetidas[lista_palabras[j]]+=count
                     else:
