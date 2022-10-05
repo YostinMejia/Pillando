@@ -19,21 +19,24 @@ if __name__=="__main__":
     # juan.enviarComentario("1","muy buen restaurante la comida me gusto pero podría mejorar la carne frita mama guevo")
 
     # #Prueba administrador
-    # admin=Administrador("1","juan")
-    # admin.actualizarCalificacion("1")
+    admin=Administrador("1","juan")
+    # admin.actualizarCalificacionRestaurante("1")
+    admin.actualizarCalificacionComentarios("1")
+    admin.actualizarCalificacionComentarios("2")
+    admin.actualizarCalificacionComentarios("3")
     # admin.agregarRestaurante("Care pinga","bloque 8","12:03am - 8:00 pm")
     # print()
     # admin.eliminarComentarios("31")
 
     # # Id producto y tipo de cambio
     
-    adminLocal=AdminLocal("1")
+    # adminLocal=AdminLocal("lk2","1")
 
     # print(adminLocal.mirarCalificacion())
-    # print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"])) 
+    # print(adminLocal.mirarPalabrasRepetidas(True,["pica","excelente"]))
     # print(adminLocal.mirarPalabrasRepetidas())
-
-    print(adminLocal.mirarPalabrasRepetidas(True) )
+    # adminLocal.graficarCalificacion()
+    # print(adminLocal.mirarPalabrasRepetidas(True) )
     # print(adminLocal.mirarPalabrasRepetidas())
     # adminLocal.mirarComentariosAdmin()
 

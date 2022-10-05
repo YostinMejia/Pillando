@@ -1,5 +1,14 @@
+from googletrans import Translator
+
 import sqlite3 as sql
 from restaurante import *
+import matplotlib.pyplot as plt
+from textblob import TextBlob
+import re
+import spacy
+
+#Cargamos Spacy en español
+nlp=spacy.load("es_core_news_lg")
 
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
@@ -27,7 +36,7 @@ class Administrador():
         # dato=cur.fetchall()
         # print(dato)    
 
-    def actualizarCalificacion(self,id_restaurante):
+    def actualizarCalificacionRestaurante(self,id_restaurante:str):
         
         cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
         comentarios=cur.fetchall()
@@ -46,10 +55,48 @@ class Administrador():
         cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
         con.commit()
 
+    #Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos
+    #Por lo que se debe de mirar que no arroje el mismo "compound" en todos los comentarios
+    def actualizarCalificacionComentarios(self, id_restaurante:str):
+        #qmark style
+        cur.execute("SELECT id,comentario FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+        datos= cur.fetchall()
+        translator = Translator(to_lang="english")
+
+        for i in range(len(datos)):
+            id_comentario=datos[i][0]
+
+            comentario=datos[i][1]
+            
+            translation = translator.translate(comentario)
+            analisis=SentimentIntensityAnalyzer().polarity_scores(translation) 
+
+            comentario=nlp(comentario)
+
+            limpiado=[]
+            for i in comentario:
+                if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
+                    limpiado.append(i.text) 
+            limpiado=" ".join(limpiado) #Se convierte a string
+            
+            enviar=(analisis["compound"],limpiado,id_comentario,)
+
+            #qmark style
+            cur.execute("UPDATE comentarios SET calificacion=? , no_stop_words=? WHERE id=? ",enviar,)
+            print("Comentario actualizado")
+            con.commit()
+
+     
         
 class AdminLocal:
 
-    def __init__(self,id_restaurante:str) -> None:
+    def __init__(self,id_admin:str,id_restaurante:str) -> None:
+
+        cur.execute(f"SELECT * FROM restaurante WHERE id=?",(id_restaurante,))
+        datos=cur.fetchall()
+
+        self.nombre_restaurante=datos[0][1]
+        self.id_admin=id_admin
         self.id_restaurante:str=id_restaurante
         
         self.palabras_repetidas:dict={}
@@ -65,7 +112,7 @@ class AdminLocal:
     
     def actualizarProductos(self,id:str,dato:str,cambio:str)-> None:
         
-        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{id}",))
+        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{self.id_restaurante}",))
         producto=cur.fetchall()
 
         nombre=producto[0][1] #1
@@ -120,9 +167,8 @@ class AdminLocal:
 
     def graficarCalificacion(self):
 
-        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id_restaurante}",))
         comentarios=cur.fetchall()
-        calificacion=0
 
         reseña=[]
         fechas=[]
@@ -130,20 +176,19 @@ class AdminLocal:
             
             txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
             analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
-            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
 
             #append para graficar
             fechas.append(comentarios[i][1])
             reseña.append(analisis["compound"])
         
                 #Config para graficar
-        mtp.style.use(['dark_background'])
-        mtp.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre}")
-        mtp.legend()
-        mtp.xlabel("FECHA")
-        mtp.ylabel("CALIFICACIÓN")
-        mtp.title(f"Calificación comentarios")
-        mtp.show()
+        plt.style.use(['dark_background'])
+        plt.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre_restaurante}")
+        plt.legend()
+        plt.xlabel("FECHA")
+        plt.ylabel("CALIFICACIÓN")
+        plt.title(f"Calificación comentarios")
+        plt.show()
     
     def mirarPalabrasRepetidas(self,actualizar=False,lista_palabras=None):
         

@@ -7,6 +7,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from translate import Translator
 
 
+
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
 cur=con.cursor()
@@ -39,7 +40,7 @@ class Restaurante:
         self.productos=productos
             
         #Se guardan los comentarios
-        self.comentarios=comentarios
+        self.comentarios=int(datos[0][3])
 
         #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
         self.calificacion=calificacion
@@ -166,15 +167,17 @@ class Restaurante:
                 contando=TextBlob(i[0])
                 contando=contando.word_counts
                 llaves=list(contando.keys())
+                
 
                 for i in llaves:
 
                     # Se evalua el sentimiento para guardar solamente las palbaras no neutrales 
                     palabra=Translator(from_lang="es", to_lang="en").translate(i) #Se traduce cada comentario
                     analisis=SentimentIntensityAnalyzer().polarity_scores(palabra) #Se analizan los sentimientos
-                    
+
                     #se mira que no sea una palabra neeutral o que este en palabras_claves
                     if (analisis["compound"] > 0.1 or analisis["compound"] < -0.1) or (i in palabras_clave): 
+                        
                         if i in repetidas: #Se guardan las palabras 
                             repetidas[i]+=contando[i]
                         else:

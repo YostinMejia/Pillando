@@ -1,10 +1,15 @@
-"""Guardar los datos una sola vez y luego el administrador puede actualizar los comentarios y calificación, 
-para poder usar la herencia y no llamar todo de la base de datos, disminuir el tiempo de ejecución"""
-
 from datetime import date
 import sqlite3 as sql
+from tempfile import TemporaryDirectory
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from translate import Translator
+import re
+import spacy
 
 from restaurante import *
+
+#Cargamos Spacy en español
+nlp=spacy.load("es_core_news_lg")
 
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
@@ -18,12 +23,30 @@ class Usuario:
         self.carerra=carrera
         self.comentarios=comentarios
         
-    def enviarComentario(self,id_restaurante:str,comentario:str)-> None:
+    def enviarComentario(self,id_restaurante:str,txt:str)-> None:
         #qmark style
-        comentario=(None,id_restaurante,comentario,date.today(),)
+        comentario=txt
+
+        palabra=Translator(from_lang="es", to_lang="en").translate(comentario) #Se traduce cada comentario
+        analisis=SentimentIntensityAnalyzer().polarity_scores(palabra) 
+
+        numeros=re.findall("[0-9]",txt)         #Se buscan los numeros 
+        txt=list(txt)         #se convierte el comentario en lista
+        for i in numeros:
+            txt.remove(i)         #Se eliminan los numeros del comentario ya que spacy no los cuenta como stop
+        
+        
+        txt="".join(txt) #Se convierte en string la lista
+        #Se usa spacy (nlp)
+        temp_txt=nlp(txt)
+        for i in temp_txt:
+            if (i.is_stop or i.is_punct):
+                txt.remove(i) # Se eliminan los stop words
+        
+        enviar=(None,id_restaurante,comentario,date.today(),analisis["compound"],txt,)
 
         #qmark style
-        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?)",comentario)
+        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?)",enviar)
         print("Comentario enviado")
         con.commit()
     
