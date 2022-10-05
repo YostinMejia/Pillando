@@ -1,12 +1,10 @@
 from datetime import date
 import sqlite3 as sql
-from tempfile import TemporaryDirectory
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from translate import Translator
 import re
 import spacy
 
-from restaurante import *
+from administradores import *
 
 #Cargamos Spacy en español
 nlp=spacy.load("es_core_news_lg")
@@ -24,29 +22,25 @@ class Usuario:
         self.comentarios=comentarios
         
     def enviarComentario(self,id_restaurante:str,txt:str)-> None:
-        #qmark style
+
         comentario=txt
 
-        palabra=Translator(from_lang="es", to_lang="en").translate(comentario) #Se traduce cada comentario
-        analisis=SentimentIntensityAnalyzer().polarity_scores(palabra) 
+        traducido=TextBlob(comentario).translate(from_lang="es", to="en") #Se traduce el comentario
+        analisis=SentimentIntensityAnalyzer().polarity_scores(traducido) 
 
-        numeros=re.findall("[0-9]",txt)         #Se buscan los numeros 
-        txt=list(txt)         #se convierte el comentario en lista
-        for i in numeros:
-            txt.remove(i)         #Se eliminan los numeros del comentario ya que spacy no los cuenta como stop
-        
-        
-        txt="".join(txt) #Se convierte en string la lista
-        #Se usa spacy (nlp)
-        temp_txt=nlp(txt)
-        for i in temp_txt:
-            if (i.is_stop or i.is_punct):
-                txt.remove(i) # Se eliminan los stop words
-        
-        enviar=(None,id_restaurante,comentario,date.today(),analisis["compound"],txt,)
+        comentario=nlp(comentario)
+        limpiado=[]
+       
+        for i in comentario:
+            if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
+                limpiado.append(i.text) 
 
+        limpiado=" ".join(limpiado) #Se convierte a string
+        comentario=comentario.text #Se convierte el objeto nlp por el texto
+        
+        enviar=(None,id_restaurante,comentario,date.today(),analisis["compound"],limpiado,)
         #qmark style
-        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?)",enviar)
+        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?,?,?)",enviar)
         print("Comentario enviado")
         con.commit()
     

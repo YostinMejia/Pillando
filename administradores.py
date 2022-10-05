@@ -1,5 +1,3 @@
-from googletrans import Translator
-
 import sqlite3 as sql
 from restaurante import *
 import matplotlib.pyplot as plt
@@ -38,15 +36,20 @@ class Administrador():
 
     def actualizarCalificacionRestaurante(self,id_restaurante:str):
         
-        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+        cur.execute(f"SELECT calificacion FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
         comentarios=cur.fetchall()
         calificacion=0
 
+        actualizo_calificacion=0
         for i in range(len(comentarios)):
-            
-            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
-            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
-            calificacion+=analisis["compound"] #Se le asigna el valor arrojado por el analisis 
+            #Si el comentario no tiene calificacion se llama otra funcion para que lo califique
+            if comentarios[i][0]==None:
+                self.actualizarCalificacionComentarios(id_restaurante)
+                actualizo_calificacion+=1
+
+        if actualizo_calificacion!=0:
+            cur.execute(f"SELECT calificacion FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+            comentarios=cur.fetchall()
 
         #Se halla el promedio
         calificacion/=len(comentarios)
@@ -55,37 +58,44 @@ class Administrador():
         cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
         con.commit()
 
+
     #Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos
     #Por lo que se debe de mirar que no arroje el mismo "compound" en todos los comentarios
     def actualizarCalificacionComentarios(self, id_restaurante:str):
         #qmark style
-        cur.execute("SELECT id,comentario FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+        cur.execute("SELECT id,comentario,no_stop_words FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
         datos= cur.fetchall()
-        translator = Translator(to_lang="english")
+
 
         for i in range(len(datos)):
             id_comentario=datos[i][0]
 
             comentario=datos[i][1]
             
-            translation = translator.translate(comentario)
-            analisis=SentimentIntensityAnalyzer().polarity_scores(translation) 
+            # #Se analiza el senimiento del comentario
+            traducido=TextBlob(comentario).translate(from_lang="es", to="en")
+            analisis=SentimentIntensityAnalyzer().polarity_scores(traducido) 
 
             comentario=nlp(comentario)
 
             limpiado=[]
-            for i in comentario:
-                if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
-                    limpiado.append(i.text) 
-            limpiado=" ".join(limpiado) #Se convierte a string
-            
-            enviar=(analisis["compound"],limpiado,id_comentario,)
+            # Si ya está no_stop_word entonces no se actualiza
+            if datos[i][2]==None:
+                for i in comentario:
+                    if (not i.is_stop and not i.is_punct and (re.search("[0-9]", i.text)==None)): # Se buscan stop words o números
+                        limpiado.append(i.text) 
+                limpiado=" ".join(limpiado) #Se convierte a string
+                enviar=(analisis["compound"],limpiado,id_comentario,)
+                #qmark style
+                cur.execute("UPDATE comentarios SET calificacion=? , no_stop_words=? WHERE id=? ",enviar)
+                con.commit()
+                print("no stop words y sentimiento actualizados actualizado")
 
-            #qmark style
-            cur.execute("UPDATE comentarios SET calificacion=? , no_stop_words=? WHERE id=? ",enviar,)
-            print("Comentario actualizado")
-            con.commit()
-
+            else:
+                enviar=(analisis["compound"],id_comentario,)
+                cur.execute("UPDATE comentarios SET calificacion=? WHERE id=? ",enviar)
+                con.commit()
+                print("sentimiento actualizado")
      
         
 class AdminLocal:

@@ -4,7 +4,7 @@ from administradores import *
 
 if __name__=="__main__":
     
-    # juan=Usuario(1,"mejia","juan","estudiante")
+    juan=Usuario(1,"mejia","juan","estudiante")
     # # id del restaurante y  tipo de informacion
     # juan.infoRestaurante("1","comentarios")
     # print()
@@ -16,14 +16,17 @@ if __name__=="__main__":
     # print()
     # juan.buscarProducto("1","hamburguesa")
     # print()
-    # juan.enviarComentario("1","muy buen restaurante la comida me gusto pero podría mejorar la carne frita mama guevo")
+    juan.enviarComentario("4","muy buena comida , me encantó")
 
     # #Prueba administrador
-    admin=Administrador("1","juan")
-    # admin.actualizarCalificacionRestaurante("1")
-    admin.actualizarCalificacionComentarios("1")
-    admin.actualizarCalificacionComentarios("2")
-    admin.actualizarCalificacionComentarios("3")
+    # admin=Administrador("1","juan")
+    # admin.actualizarCalificacionRestaurante("6")
+    # admin.actualizarCalificacionRestaurante("4")
+
+    # admin.actualizarCalificacionRestaurante("5")
+    # admin.actualizarCalificacionComentarios("6")
+    # admin.actualizarCalificacionComentarios("2")
+    # admin.actualizarCalificacionComentarios("3")
     # admin.agregarRestaurante("Care pinga","bloque 8","12:03am - 8:00 pm")
     # print()
     # admin.eliminarComentarios("31")
