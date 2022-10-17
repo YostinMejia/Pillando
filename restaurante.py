@@ -3,7 +3,6 @@ import re
 
 from textblob import TextBlob
 from unicodedata import normalize
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 import spacy
 
@@ -174,6 +173,7 @@ class Restaurante:
                 # #Por primera vez, se pueden guardar todas las palabras ya que el dict repetidas está vacio
                 if i==0:
                     repetidas=dict(contando)
+                    
                 else:    
                     for j in llaves:
                         if i in repetidas: #Se guardan las palabras 
@@ -190,10 +190,10 @@ class Restaurante:
                 for j in range(len(lista_palabras)):
                     count=contando.word_counts[lista_palabras[j]]
 
-                    if lista_palabras[j] in repetidas: #Se guardan las palabras 
-                        repetidas[lista_palabras[j]]+=count
+                    if lista_palabras[j] in repetidas: 
+                        repetidas[lista_palabras[j]]+=count #Se guardan las palabras 
                     else:
-                        repetidas[lista_palabras[j]]=count
+                        repetidas[lista_palabras[j]]=count #Se guardan las palabras 
 
         return repetidas
 

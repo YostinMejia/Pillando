@@ -2,7 +2,7 @@ import sqlite3 as sql
 from restaurante import *
 import matplotlib.pyplot as plt
 from textblob import TextBlob
-import re
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import spacy
 
 #Cargamos Spacy en español
