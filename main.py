@@ -1,11 +1,15 @@
 from restaurante import *
-from usuario import *
 from administradores import *
+from usuario_estudiante import *
+from usuario_profesor import *
+from usuario_universidadadminstrador import *
+
 
 if __name__=="__main__":
     
-    # juan=Usuario(1,"mejia","juan","estudiante")
+    juan=Estudiante("1","brayan","juan","sistemas")
     # # id del restaurante y  tipo de informacion
+    juan.buscarProductosRestaurante("salchipapa","Don Beto") #Hay que escribir el nombre respetando mayusculas
     # juan.infoRestaurante("1","comentarios")
     # print()
     # juan.infoRestaurante("1","ubicacion")
@@ -18,8 +22,8 @@ if __name__=="__main__":
     # print()
     # juan.enviarComentario("4","muy buena comida , me encantó")
 
-    # #Prueba administrador
-    admin=Administrador("1","juan")
+    # # #Prueba administrador
+    # admin=Administrador("1","juan")
     # admin.actualizarCalificacionRestaurante("6")
     # admin.actualizarCalificacionRestaurante("4")
 

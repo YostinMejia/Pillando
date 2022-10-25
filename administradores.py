@@ -5,17 +5,21 @@ from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import spacy
 
-#Cargamos Spacy en español
-nlp=spacy.load("es_core_news_lg")
+from restaurante import *
+from usuario import *
+
+
 
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
 cur=con.cursor()
 
-class Administrador():
-    def __init__(self,id:str,nombre:str) -> None:
-        self.id=id
-        self.nombre=nombre
+class AdministradorBd(Usuario):
+
+    def __init__(self, id: str, apodo: str, nombre: str, cargo:str,comentarios=...) -> None:
+        super().__init__(id, apodo, nombre, comentarios)
+        self.__cargo=cargo
+
 
     def agregarRestaurante(self,nombre:str,ubicacion:str,horario:str)-> None:
 
@@ -30,9 +34,12 @@ class Administrador():
         cur.execute("DELETE FROM comentarios WHERE id= ?",(f"{comentario}",))
         con.commit()
         print("Comentario eliminado")
-        # cur.execute("SELECT * FROM comentarios WHERE id=?",(f"{id_comentario}",))
-        # dato=cur.fetchall()
-        # print(dato)    
+
+class AdministradorGeneral(Usuario):
+
+    def __init__(self, id: str, apodo: str, nombre: str, cargo:str,comentarios=...) -> None:
+        super().__init__(id, apodo, nombre, comentarios)
+        self.__cargo=cargo
 
     def actualizarCalificacionRestaurante(self,id_restaurante:str):
         
@@ -42,6 +49,7 @@ class Administrador():
 
         actualizo_calificacion=0
         for i in range(len(comentarios)):
+
             #Si el comentario no tiene calificacion se llama otra funcion para que lo califique
             if comentarios[i][0]==None:
                 self.actualizarCalificacionComentarios(id_restaurante)
@@ -65,6 +73,8 @@ class Administrador():
     """Hay que mirar que si se este traduciendo y no se haya agotado la memoria TRY EXCEPT"""
 
     def actualizarCalificacionComentarios(self, id_restaurante:str):
+        #Cargamos Spacy en español
+        nlp=spacy.load("es_core_news_lg")
         #qmark style
         cur.execute("SELECT id,comentario,no_stop_words FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
         datos= cur.fetchall()
@@ -103,32 +113,29 @@ class Administrador():
                 print("sentimiento actualizado")
      
         
-class AdminLocal:
+class AdministradorLocal(Usuario):
 
-    def __init__(self,id_admin:str,id_restaurante:str) -> None:
+    def __init__(self, id: str, apodo: str, nombre: str, id_restaurante:str, comentarios=...) -> None:
+        super().__init__(id, apodo, nombre, comentarios)
 
-        cur.execute(f"SELECT * FROM restaurante WHERE id=?",(id_restaurante,))
-        datos=cur.fetchall()
-
-        self.nombre_restaurante=datos[0][1]
-        self.id_admin=id_admin
-        self.id_restaurante:str=id_restaurante
+        self.__id_restaurante:str=id_restaurante
         
-        self.palabras_repetidas:dict={}
+        self.__palabras_repetidas:dict={}
+
 
     def agregarProducto(self,prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
 
-        producto=(None,prod_nombre,self.id_restaurante,prod_precio,prod_descripcion,prod_alias,)
+        producto=(None,prod_nombre,self.__id_restaurante,prod_precio,prod_descripcion,prod_alias,)
         
         cur.execute("INSERT INTO productos VALUES(?,?,?,?,?,?)",producto)
         con.commit()
         print("Producto Agregado")
         
     
-    def actualizarProductos(self,id:str,dato:str,cambio:str)-> None:
+    def actualizarProducto(self,id:str,dato:str,cambio:str)-> None:
         
-        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{self.id_restaurante}",))
-        producto=cur.fetchall()
+        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{self.__id_restaurante}",))
+        producto=cur.fetchone()
 
         nombre=producto[0][1] #1
         precio=producto[0][3] #2
@@ -166,23 +173,23 @@ class AdminLocal:
     def cambiarInfoRestaurante(self,dato:str,cambio:str):
 
         if dato=="nombre":
-            cur.execute("UPDATE restaurante SET nombre=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            cur.execute("UPDATE restaurante SET nombre=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
         elif dato=="ubicacion":
-            cur.execute("UPDATE restaurante SET ubicacion=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            cur.execute("UPDATE restaurante SET ubicacion=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
         elif dato=="horario":
-            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambio}",f"{self.id_restaurante}",))
+            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
     
     def mirarCalificacion(self):
-        obj_temp=Restaurante(self.id_restaurante)
+        obj_temp=Restaurante(self.__id_restaurante)
 
         return obj_temp.mirarCalificacion()
 
     def graficarCalificacion(self):
 
-        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id_restaurante}",))
+        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.__id_restaurante}",))
         comentarios=cur.fetchall()
 
         reseña=[]
@@ -208,12 +215,12 @@ class AdminLocal:
     def mirarPalabrasRepetidas(self,actualizar=False,lista_palabras=None):
         
         if actualizar==True:
-            obj_temp=Restaurante(self.id_restaurante)
-            self.palabras_repetidas=obj_temp.palabrasRepetidas(lista_palabras)
+            obj_temp=Restaurante(self.__id_restaurante)
+            self.__palabras_repetidas=obj_temp.palabrasRepetidas(lista_palabras)
         
-        return self.palabras_repetidas
+        return self.__palabras_repetidas
     
 
     def mirarComentarios(self):
-        obj_temp=Restaurante(self.id_restaurante)
+        obj_temp=Restaurante(self.__id_restaurante)
         return obj_temp.mirarComentarios()

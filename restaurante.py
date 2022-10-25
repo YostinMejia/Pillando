@@ -4,11 +4,6 @@ import re
 from textblob import TextBlob
 from unicodedata import normalize
 
-import spacy
-
-#Cargamos Spacy en español
-nlp=spacy.load("es_core_news_lg")
-
 #Inicia coneccion con la bd
 con=sql.connect("database.db")
 cur=con.cursor()
@@ -44,69 +39,7 @@ class Restaurante:
         self.comentarios=int(datos[0][3])
 
         #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
-        self.calificacion=calificacion
-
-
-    def mirarProductos(self,eleccion:str):
-        eleccion=limpiarStr(eleccion)
-    
-        cur.execute("SELECT * FROM productos WHERE id_restaurante= ? and (nombre LIKE ? OR alias LIKE ?)",(f"{self.id}",f"{eleccion}%",f"{eleccion}%",))
-        productos=cur.fetchall()
-
-        #Si sen encuentra el producto en local solicitado
-        if len(productos)!=0:
-
-            for i in range(len(productos)):
-                if productos[i][4]!=None:
-                    if productos[i][5]!=None:
-                        print(f"{productos[i][5]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]} ")
-                    else:
-                        print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}. \n descripción: {productos[i][4]}")
-                else:
-                    print(f"{productos[i][1]} cuesta {productos[i][3]}, esta disponible en {self.nombre} {self.ubicacion}.")
-        
-        #Si no en encuentra
-        else:
-            #Se recorta la palabra y se vulve a buscar en el mismo local
-            tamano=len(eleccion)
-            eleccion2=eleccion
-            eleccion=eleccion[0:(tamano//2)]
-            cur.execute("SELECT * FROM productos WHERE id_restaurante= ? and (nombre LIKE ? OR alias LIKE ?)",(f"{self.id}",f"{eleccion}%",f"{eleccion}%",))
-            productos=cur.fetchall()
-
-            #si no se encuentra nada en el local solicitado
-            if len(productos)==0:
-                print(f"{eleccion2} no está disponible en {self.nombre}")
-
-                pregunta=input("¿Desea ver si esta disponible en otro local?-> ")
-                pregunta=limpiarStr(pregunta).lower()
-                #Solo se controla si escribe "si" -----------------------------chatobot-----------------------------
-                #Si desea buscar en todos los locales
-                if pregunta=="si":
-                    cur.execute("SELECT * FROM productos WHERE nombre LIKE ? OR alias LIKE ?",(f"{eleccion}%",f"{eleccion}%",))
-                    productos=cur.fetchall()
-
-                    #Si se encuentra el producto en cualquier local
-                    if len(productos)!=0:
-
-                        for i in range(len(productos)):
-
-                            # Se busca el(los) nombre(s) del restaurante que lo tiene y su ubicacion
-                            id_restaurante=productos[i][2]
-                            cur.execute("SELECT nombre,ubicacion FROM restaurante WHERE id=?",(id_restaurante,))
-                            restaurante=cur.fetchall()
-
-                            if productos[i][4]!=None:
-                                if productos[i][5]!=None:
-                                    print(f"{productos[i][5]} cuesta {productos[i][3]} y está disponible en  \n{restaurante[0][0]} {restaurante[0][1]}. \n descripción: {productos[i][4]} \n")
-                                else:
-                                    print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en  \n{restaurante[0][0]} {restaurante[0][1]}. \n descripción: {productos[i][4]} \n")
-                            else:
-                                print(f"{productos[i][1]} cuesta {productos[i][3]} y está disponible en \n{restaurante[0][0]} {restaurante[0][1]}. \n")
-                    
-                    #Si no se encuentra nada en ningun local
-                    else:
-                        print(f"Le toco salir de la universidad a buscar porque aquí no hay {eleccion2}")
+        self.__calificacion=calificacion
             
 
     def mirarUbicacion(self):
@@ -123,23 +56,8 @@ class Restaurante:
         cur.execute("SELECT calificacion FROM restaurante WHERE id=?",(f"{self.id}",))
         calificacion=cur.fetchall()
         calificacion=calificacion[0][0]
+        return self.__calificacion
 
-        if calificacion>=0.4:
-            if calificacion<=0.55:
-                estrellas="★ ★ ☆"
-            elif calificacion>=0.55 and calificacion<=0.6:
-                estrellas="★ ★ ★"
-            elif calificacion>=0.6 and calificacion<=0.7:
-                estrellas="★ ★ ★ ☆"
-            else:
-                estrellas="★ ★ ★ ★ ★"
-        else:
-            if calificacion>-0.5:
-                estrellas="☆ "
-            else:
-                estrellas="🗑️"
-
-        return estrellas
 
     def mirarComentarios(self)-> list:
         
@@ -153,7 +71,7 @@ class Restaurante:
 
     """Hay que mirar si quiere una cantidad minima de palabras"""
     
-    def palabrasRepetidas(self,lista_palabras:list) -> dict:
+    def mirarpalabrasRepetidas(self,lista_palabras:list) -> dict:
         
         cur.execute("SELECT no_stop_words FROM comentarios")
         lista_comentarios=cur.fetchall()
