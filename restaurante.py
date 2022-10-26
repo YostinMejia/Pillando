@@ -1,7 +1,6 @@
 import sqlite3 as sql
 import re
 
-from textblob import TextBlob
 from unicodedata import normalize
 
 #Inicia coneccion con la bd
@@ -71,48 +70,4 @@ class Restaurante:
 
     """Hay que mirar si quiere una cantidad minima de palabras"""
     
-    def mirarpalabrasRepetidas(self,lista_palabras:list) -> dict:
-        
-        cur.execute("SELECT no_stop_words FROM comentarios")
-        lista_comentarios=cur.fetchall()
-
-        repetidas={}
-
-        #Si no selecciono ninguna palabra en especifico
-        if lista_palabras==None:
-
-            #Se miran todas las palabras y se guarda cuantas veces estan repetidas
-            for i in range(len(lista_comentarios)):
-                
-                palabras=TextBlob(lista_comentarios[i][0])  #Se guarda el no stop words
-                contando=palabras.word_counts   #Se cuentan las palabras
-                llaves=list(contando.keys())
-
-                # #Por primera vez, se pueden guardar todas las palabras ya que el dict repetidas está vacio
-                if i==0:
-                    repetidas=dict(contando)
-                    
-                else:    
-                    for j in llaves:
-                        if i in repetidas: #Se guardan las palabras 
-                            repetidas[j]+=contando[j]
-                        else:
-                            repetidas[j]=contando[j]
-                            
-        #Si selecciono una o varias palabras se buscan
-        else:
-            for i in range(len(lista_comentarios)):
-            #Se miran todas las palabras y se guarda cuantas veces estan repetidas
-                contando=TextBlob(lista_comentarios[i][0])
-
-                for j in range(len(lista_palabras)):
-                    count=contando.word_counts[lista_palabras[j]]
-
-                    if lista_palabras[j] in repetidas: 
-                        repetidas[lista_palabras[j]]+=count #Se guardan las palabras 
-                    else:
-                        repetidas[lista_palabras[j]]=count #Se guardan las palabras 
-
-        return repetidas
-
                 

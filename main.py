@@ -1,5 +1,9 @@
 from restaurante import *
-from administradores import *
+
+from admin_bd import *
+from admin_general import *
+from admin_locales import *
+
 from usuario_estudiante import *
 from usuario_profesor import *
 from usuario_universidadadminstrador import *

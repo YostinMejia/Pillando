@@ -3,6 +3,7 @@ import sqlite3 as sql
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import re
 import spacy
+from textblob import TextBlob
 
 from restaurante import *
 
@@ -11,11 +12,25 @@ con=sql.connect("database.db")
 cur=con.cursor()
 
 class Usuario:
+    
     def __init__(self,id:str,apodo:str,nombre:str,comentarios=[]) -> None:
         self.__id=id
         self.__apodo=apodo
         self.__nombre=nombre
         self.__comentarios=comentarios
+
+    def comentarProducto(self, id_producto:str, usuario_calificacion:int ):
+        """Crear tabla de comentarios para los productos"""
+        # cur.execute("SELECT calificacion FROM productos WHERE id=? ",(id_producto,))
+        # calificacion=cur.fetchone()
+        # calificacion_actual=calificacion[0]
+
+        # # calificacion_total=(calificacion_actual+usuario_calificacion)//2
+
+        # cur.execute("UPDATE productos SET calificacion=? WHERE id=?",(calificacion_total, id_producto,))
+        # con.commit()
+
+        return "Calificación enviada"
         
     def enviarComentario(self,id_restaurante:str,txt:str)-> None:
         #Cargamos Spacy en español
@@ -50,12 +65,12 @@ class Usuario:
 
         obj_temp=Restaurante(str(id_restaurante))
         info=str(info)
-        dato=""
+        dato=[]
 
-        if info=="comentarios": #comentarios
-            dato=obj_temp.mirarComentarios()
+        if "comentarios" in info: #comentarios
+            dato.append(obj_temp.mirarComentarios())
 
-        elif info=="calificacion": #calificacion
+        if "calificacion"  in info: #calificacion
             calificacion=obj_temp.mirarCalificacion()
             
             if calificacion>=0.4:
@@ -73,12 +88,12 @@ class Usuario:
                 else:
                     estrellas="🗑️"
 
-            return estrellas,calificacion
+            dato.append(estrellas,calificacion)
 
-        elif info=="horario": #horario
-            dato=obj_temp.mirarHorario()
-        elif info=="ubicacion": #ubicacion
-            dato=obj_temp.mirarUbicacion()
+        if "horario"  in info: #horario
+            dato.append(obj_temp.mirarHorario())
+        if "ubicacion"  in info: #ubicacion
+            dato.append(obj_temp.mirarUbicacion())
         
         return dato
 
@@ -87,10 +102,14 @@ class Usuario:
         cur.execute("SELECT * FROM productos WHERE (nombre LIKE ? OR alias LIKE ?)",(f"{nombre_producto}%",f"{nombre_producto}%",))
         productos=cur.fetchall()
         list_restaurantes=[]
+        
+
         #Si sen encuentra el producto en local solicitado
+
         if len(productos)!=0:
 
             for i in range(len(productos)):
+
                 cur.execute("SELECT * FROM restaurante WHERE id=?",(f"{productos[i][2]}"))
                 restaurante=cur.fetchone()
                 list_restaurantes.append(restaurante)
