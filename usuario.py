@@ -1,5 +1,6 @@
 from datetime import date
 import sqlite3 as sql
+from tkinter.tix import Select
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import re
 import spacy
@@ -13,29 +14,31 @@ cur=con.cursor()
 
 class Usuario:
     
-    def __init__(self,id:str,apodo:str,nombre:str,comentarios=[]) -> None:
+    def __init__(self,id:str, apodo:str, nombre:str, comentarios=[]) -> None:
         self.__id=id
         self.__apodo=apodo
         self.__nombre=nombre
         self.__comentarios=comentarios
-
-    def comentarProducto(self, id_producto:str, usuario_calificacion:int ):
-        """Crear tabla de comentarios para los productos"""
-        # cur.execute("SELECT calificacion FROM productos WHERE id=? ",(id_producto,))
-        # calificacion=cur.fetchone()
-        # calificacion_actual=calificacion[0]
-
-        # # calificacion_total=(calificacion_actual+usuario_calificacion)//2
-
-        # cur.execute("UPDATE productos SET calificacion=? WHERE id=?",(calificacion_total, id_producto,))
-        # con.commit()
-
-        return "Calificación enviada"
+    
+    def mirarComentarios(self)->tuple:
+        cur.execute("SELECT comentario, fecha FROM comentarios WHERE id_usuario= ?" ,(self.__id,))
+        comentarios=cur.fetchall()
+        restaurantes_comentarios=["restaurantes"]
+        restaurantes_comentarios.append(comentarios)
         
-    def enviarComentario(self,id_restaurante:str,txt:str)-> None:
+
+        cur.execute("SELECT comentario, fecha FROM comentarios_productos WHERE id_usuario= ?" ,(self.__id,))
+        comentarios=cur.fetchall()
+        productos_comentados=["productos"]
+        productos_comentados.append(comentarios)
+
+        return restaurantes_comentarios, productos_comentados
+
+
+    def __enviarComentario(self, producto_o_restaurante:str , id:str, txt:str )->tuple:
         #Cargamos Spacy en español
         nlp=spacy.load("es_core_news_lg")
-        self.__comentarios.append([id_restaurante,txt])
+        self.__comentarios.append([producto_o_restaurante, id, txt])
 
         comentario=txt
 
@@ -53,15 +56,36 @@ class Usuario:
         no_stop_words=" ".join(no_stop_words) #Se convierte a string
         comentario=comentario.text #Se convierte el objeto nlp por el texto
         
-        enviar=(None,id_restaurante,comentario,date.today(),analisis["compound"],no_stop_words,)
-        #qmark style
-        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?,?,?)",enviar)
+        enviar=(None,id,comentario,date.today(),analisis["compound"],no_stop_words,self.__id,)
+
+        return enviar
+
+
+    def enviarComentarioProducto(self , id_producto:str, txt:str)->str:
+
+        enviar=self.__enviarComentario("producto", id_producto, txt)
+
+        cur.execute("INSERT INTO comentarios_productos VALUES(?,?,?,?,?,?,?)", enviar)
         print("Comentario enviado")
         con.commit()
+
+        return "Comentario enviado"
+        
+    def enviarComentarioRestaurante(self,id_restaurante:str,txt:str)-> str:
+
+        enviar=self.__enviarComentario("restaurante",id_restaurante, txt)
+
+        #qmark style
+        cur.execute("INSERT INTO comentarios VALUES(?,?,?,?,?,?,?)",enviar)
+        print("Comentario enviado")
+        con.commit()
+
+        return "Comentario enviado"
+
     
     #--------------------Hay que mirar que el chat bot revise los id y según el nombre que arroje el ususario ponga los id----------------------
 
-    def infoRestaurante(self,id_restaurante:str,info:str)-> str|list:
+    def infoRestaurante(self, id_restaurante:str, info:str)-> str|list:
 
         obj_temp=Restaurante(str(id_restaurante))
         info=str(info)
@@ -102,7 +126,6 @@ class Usuario:
         cur.execute("SELECT * FROM productos WHERE (nombre LIKE ? OR alias LIKE ?)",(f"{nombre_producto}%",f"{nombre_producto}%",))
         productos=cur.fetchall()
         list_restaurantes=[]
-        
 
         #Si sen encuentra el producto en local solicitado
 

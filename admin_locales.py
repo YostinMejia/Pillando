@@ -15,14 +15,14 @@ cur=con.cursor()
 class AdministradorLocal(Usuario):
 
     def __init__(self, id: str, apodo: str, nombre: str, id_restaurante:str, comentarios=...) -> None:
-        super().__init__(id, apodo, nombre, comentarios)
+        super().__init__(id, apodo, nombre, comentario)
 
         self.__id_restaurante:str=id_restaurante
         
         self.__palabras_repetidas:dict={}
 
 
-    def agregarProducto(self,prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
+    def agregarProducto(self, prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
 
         producto=(None,prod_nombre,self.__id_restaurante,prod_precio,prod_descripcion,prod_alias,)
         
@@ -33,7 +33,7 @@ class AdministradorLocal(Usuario):
     
     def actualizarProducto(self,id:str,dato:str,cambio:str)-> None:
         
-        cur.execute("SELECT * FROM productos WHERE id=? ",(f"{self.__id_restaurante}",))
+        cur.execute("SELE  FROM productos WHERE id= ",(f"{self.__id_restaurante}",))
         producto=cur.fetchone()
 
         nombre=producto[0][1] #1
@@ -41,12 +41,12 @@ class AdministradorLocal(Usuario):
         descripcion=producto[0][4] #3
         alias=producto[0][5] #4
         
-        if dato!="eliminar":
+        if datos!="eliminar":
 
             if dato=="nombre":
                 nombre=limpiarStr(nombre)
                 nombre=cambio
-            elif dato=="precio":
+            elif datos=="precio":
                 precio=int(cambio)
             elif dato=="descripcion":
                 descripcion=cambio
@@ -78,7 +78,7 @@ class AdministradorLocal(Usuario):
             cur.execute("UPDATE restaurante SET ubicacion=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
         elif dato=="horario":
-            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
+            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambiar}",f"{self.__id_restaurante}",))
             con.commit()
     
     def mirarCalificacion(self):
@@ -88,23 +88,23 @@ class AdministradorLocal(Usuario):
 
     def graficarCalificacion(self):
 
-        cur.execute(f"SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.__id_restaurante}",))
+        cur.execute("SELECT fecha,calificacion FROM comentarios WHERE id_restaurante=?",(f"{self.__id_restaurante}",))
         comentarios=cur.fetchall()
 
-        reseña=[]
+        resena=[]
         fechas=[]
+
+
         for i in range(len(comentarios)):
             
-            txt=TextBlob(comentarios[i][0]).translate(from_lang="es", to="en") #Se traduce cada comentario
-            analisis=SentimentIntensityAnalyzer().polarity_scores(txt) #Se analizan los sentimientos
-
             #append para graficar
-            fechas.append(comentarios[i][1])
-            reseña.append(analisis["compound"])
+            fechas.append(comentarios[i][0])
+            resena.append(comentarios[i][1])
+   
         
                 #Config para graficar
         plt.style.use(['dark_background'])
-        plt.plot(fechas,reseña,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS DE {self.nombre_restaurante}")
+        plt.plot(fechas,resena,linestyle="-",color="g",label=F"RESEÑA DE LOS COMENTARIOS ")
         plt.legend()
         plt.xlabel("FECHA")
         plt.ylabel("CALIFICACIÓN")

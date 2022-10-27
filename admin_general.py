@@ -19,8 +19,9 @@ class AdministradorGeneral(Usuario):
 
     def actualizarCalificacionRestaurante(self,id_restaurante:str):
         
-        cur.execute(f"SELECT calificacion FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
+        cur.execute("SELECT calificacion FROM comentarios WHERE id_restaurante=?",(id_restaurante,))
         comentarios=cur.fetchall()
+        print(comentarios)
         calificacion=0
 
         actualizo_calificacion=0
@@ -30,21 +31,28 @@ class AdministradorGeneral(Usuario):
             if comentarios[i][0]==None:
                 self.actualizarCalificacionComentarios(id_restaurante)
                 actualizo_calificacion+=1
+            else:
+                calificacion+=int(comentarios[i][0])
 
-        if actualizo_calificacion!=0:
-            cur.execute(f"SELECT calificacion FROM comentarios WHERE id_restaurante=?",(f"{id_restaurante}",))
-            comentarios=cur.fetchall()
+        #Si se actualizo algun comentario entonces se vuelve a ejecutar
+        if actualizo_calificacion==0:
+            self.actualizarCalificacionRestaurante(id_restaurante)
 
-        #Se halla el promedio
-        calificacion/=len(comentarios)
+        #Si no se actualizo ningun comentario
+        else:
+            #El promdio de calificacion
+            calificacion/=len(comentarios)
+
 
         datos=(calificacion,id_restaurante,)
         cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
         con.commit()
 
+        print("calificacion actualizada")
 
-    #Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos
-    #Por lo que se debe de mirar que no arroje el mismo "compound" en todos los comentarios
+
+    """Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos
+    Por lo que se debe de mirar que no arroje el mismo "compound" en todos los comentarios"""
     
     """Hay que mirar que si se este traduciendo y no se haya agotado la memoria TRY EXCEPT"""
 
@@ -68,6 +76,7 @@ class AdministradorGeneral(Usuario):
             comentario=nlp(comentario)
 
             limpiado=[]
+
             # Si ya está no_stop_word entonces no se actualiza
             if datos[i][2]==None:
                 for i in comentario:
