@@ -3,7 +3,6 @@ from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import spacy
 
-from restaurante import *
 from usuario import *
 
 
@@ -13,8 +12,8 @@ cur=con.cursor()
 
 class AdministradorGeneral(Usuario):
 
-    def __init__(self, id: str, apodo: str, nombre: str, cargo:str,comentarios=...) -> None:
-        super().__init__(id, apodo, nombre, comentarios)
+    def __init__(self, id: str, apodo: str, nombre: str, cargo:str) -> None:
+        super().__init__(id, apodo, nombre)
         self.__cargo=cargo
 
     def actualizarCalificacionRestaurante(self,id_restaurante:str):

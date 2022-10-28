@@ -14,8 +14,8 @@ cur=con.cursor()
         
 class AdministradorLocal(Usuario):
 
-    def __init__(self, id: str, apodo: str, nombre: str, id_restaurante:str, comentarios=...) -> None:
-        super().__init__(id, apodo, nombre, comentario)
+    def __init__(self, id: str, apodo: str, nombre: str, id_restaurante:str) -> None:
+        super().__init__(id, apodo, nombre)
 
         self.__id_restaurante:str=id_restaurante
         

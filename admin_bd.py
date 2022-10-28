@@ -8,8 +8,8 @@ cur=con.cursor()
 
 class AdministradorBd(Usuario):
 
-    def __init__(self, id: str, apodo: str, nombre: str, cargo:str,comentarios=...) -> None:
-        super().__init__(id, apodo, nombre, comentarios)
+    def __init__(self, id: str, apodo: str, nombre: str, cargo:str) -> None:
+        super().__init__(id, apodo, nombre)
         self.__cargo=cargo
 
 
