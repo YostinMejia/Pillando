@@ -20,47 +20,34 @@ def limpiarStr(palabra):
 #El usuario puede crear un objeto restaurante y este se puede almacenar en un json para no repetirlo
 class Restaurante:
     
-    def __init__(self,id:str,productos="",comentarios=[],calificacion=0) -> None:
+    def __init__(self,id:str) -> None:
         
         self.id=str(id)
 
         #Se guardan los datos basicos que estan en la tabla restaurante
         cur.execute(f"SELECT * FROM restaurante WHERE id=?",(self.id,))
         datos=cur.fetchall()
-        self.nombre=datos[0][1]
-        self.ubicacion=datos[0][2]
-        self.horario=datos[0][4]
-
-        #Se guardan los productos de la tabla productos
-        self.productos=productos
-            
-        #Se guardan los comentarios
-        self.comentarios=int(datos[0][3])
-
-        #Luego cuando el usuario quiera ver la calificacion se otorga la calificacion
-        self.__calificacion=calificacion
+        # print(datos)
+        self.__nombre=datos[0][1]
+        self.__ubicacion=datos[0][2]
+        self.__calificacion=datos[0][3]
+        self.__horario=datos[0][4]
             
 
     def mirarUbicacion(self):
-        cur.execute("SELECT ubicacion FROM restaurante")
-        ubicacion=cur.fetchall()
-        print (f" {self.nombre} queda en el {ubicacion[0][0]}")
+        return self.__ubicacion
     
     def mirarHorario(self):
-        cur.execute("SELECT horario FROM restaurante")
-        horario=cur.fetchall()
-        print (f"{self.nombre} tiene un horario de {horario[0][0]}")
+        return self.__horario
+
 
     def mirarCalificacion(self):
-        cur.execute("SELECT calificacion FROM restaurante WHERE id=?",(f"{self.id}",))
-        calificacion=cur.fetchall()
-        calificacion=calificacion[0][0]
         return self.__calificacion
 
 
     def mirarComentarios(self)-> list:
         
-        cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(f"{self.id}",))
+        cur.execute("SELECT comentario,fecha FROM comentarios WHERE id_restaurante=?",(self.id,))
         lista_comentarios=cur.fetchall()
 
         return lista_comentarios

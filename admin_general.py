@@ -20,34 +20,40 @@ class AdministradorGeneral(Usuario):
         
         cur.execute("SELECT calificacion FROM comentarios WHERE id_restaurante=?",(id_restaurante,))
         comentarios=cur.fetchall()
-        print(comentarios)
+        # print(comentarios)
         calificacion=0
 
         actualizo_calificacion=0
-        for i in range(len(comentarios)):
 
-            #Si el comentario no tiene calificacion se llama otra funcion para que lo califique
-            if comentarios[i][0]==None:
-                self.actualizarCalificacionComentarios(id_restaurante)
-                actualizo_calificacion+=1
-            else:
-                calificacion+=int(comentarios[i][0])
-
-        #Si se actualizo algun comentario entonces se vuelve a ejecutar
-        if actualizo_calificacion==0:
-            self.actualizarCalificacionRestaurante(id_restaurante)
-
-        #Si no se actualizo ningun comentario
+        if len(comentarios)==0:
+            print("El restaurante no tiene comentarios ")
         else:
-            #El promdio de calificacion
-            calificacion/=len(comentarios)
+            for i in range(len(comentarios)):
+
+                #Si el comentario no tiene calificacion se llama otra funcion para que lo califique
+                if comentarios[i][0]==None:
+                        self.actualizarCalificacionComentarios(id_restaurante)
+                        actualizo_calificacion+=1
+
+                else:
+                    calificacion+=comentarios[i][0]
 
 
-        datos=(calificacion,id_restaurante,)
-        cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
-        con.commit()
+            #Si se actualizo algun comentario entonces se vuelve a ejecutar
+            if actualizo_calificacion!=0:
+                self.actualizarCalificacionRestaurante(id_restaurante)
 
-        print("calificacion actualizada")
+            #Si no se actualizo ningun comentario
+            else:
+                #El promdio de calificacion
+                calificacion/=len(comentarios)
+
+
+            datos=(calificacion,id_restaurante,)
+            cur.execute(f"UPDATE restaurante SET calificacion=? WHERE id=? ",datos)
+            con.commit()
+
+            print("calificacion actualizada")
 
 
     """Esta es importante porque a veces se acaba el espacion en memoria para traducir entonces deja de funcionar el analisis de sentiemientos

@@ -26,13 +26,13 @@ class AdministradorBd(Usuario):
     def eliminarRestaurante(self, id_restaurante:str)-> None:
 
         #elimina el restaurante de la tabla "restaurante"
-        cur.execute("DELETE FROM restaurante WHERE id=?",(id_restaurante))
+        cur.execute("DELETE FROM restaurante WHERE id=?",(id_restaurante,))
         #productos del restaurante
-        cur.execute("DELETE FROM productos WHERE id_restaurante=? ",(id_restaurante))
+        cur.execute("DELETE FROM productos WHERE id_restaurante=? ",(id_restaurante,))
         #comentarios de su restaurante
-        cur.execute("DELETE FROM comentarios WHERE id_restaurante=? ",(id_restaurante))
+        cur.execute("DELETE FROM comentarios WHERE id_restaurante=? ",(id_restaurante,))
         #comentarios de sus productos
-        cur.execute("DELETE FROM comentarios_productos WHERE id_restaurante=? ",(id_restaurante))
+        cur.execute("DELETE FROM comentarios_productos WHERE id_restaurante=? ",(id_restaurante,))
         
         con.commit()
 

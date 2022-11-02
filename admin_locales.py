@@ -24,29 +24,30 @@ class AdministradorLocal(Usuario):
 
     def agregarProducto(self, prod_nombre:str ,prod_precio:int ,prod_descripcion:str ,prod_alias:str)-> None:
 
-        producto=(None,prod_nombre,self.__id_restaurante,prod_precio,prod_descripcion,prod_alias,)
+        producto=(None,prod_nombre,self.__id_restaurante,prod_precio,prod_descripcion,prod_alias,0,)
         
-        cur.execute("INSERT INTO productos VALUES(?,?,?,?,?,?)",producto)
+        cur.execute("INSERT INTO productos VALUES(?,?,?,?,?,?,?)",producto)
         con.commit()
         print("Producto Agregado")
         
     
     def actualizarProducto(self,id:str,dato:str,cambio:str)-> None:
         
-        cur.execute("SELE  FROM productos WHERE id= ",(f"{self.__id_restaurante}",))
+        cur.execute("SELECT * FROM productos WHERE id=? ",(id,))
         producto=cur.fetchone()
+        print(producto)
 
-        nombre=producto[0][1] #1
-        precio=producto[0][3] #2
-        descripcion=producto[0][4] #3
-        alias=producto[0][5] #4
+        nombre=producto[1] #1
+        precio=producto[3] #2
+        descripcion=producto[4] #3
+        alias=producto[5] #4
         
-        if datos!="eliminar":
+        if dato!="eliminar":
 
             if dato=="nombre":
-                nombre=limpiarStr(nombre)
+                # nombre=limpiarStr(nombre)
                 nombre=cambio
-            elif datos=="precio":
+            elif dato=="precio":
                 precio=int(cambio)
             elif dato=="descripcion":
                 descripcion=cambio
@@ -63,9 +64,9 @@ class AdministradorLocal(Usuario):
             con.commit()
             print("producto actualizado")
         
-        #Eliminar producto por id
+        # Eliminar producto por id
         else:
-            cur.execute("DELETE FROM productos WHERE id=? ",(f"{id}"),)
+            cur.execute("DELETE FROM productos WHERE id=? ",(id,))
             con.commit()
             print("Producto eliminado")
         
@@ -74,12 +75,18 @@ class AdministradorLocal(Usuario):
         if dato=="nombre":
             cur.execute("UPDATE restaurante SET nombre=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
+            print("Nombre actualizado")
         elif dato=="ubicacion":
             cur.execute("UPDATE restaurante SET ubicacion=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
+            print("Ubicación actualizada")
+
         elif dato=="horario":
-            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambiar}",f"{self.__id_restaurante}",))
+            cur.execute("UPDATE restaurante SET horario=? WHERE id=?",(f"{cambio}",f"{self.__id_restaurante}",))
             con.commit()
+            print("Horario actualizado")
+
+        
     
     def mirarCalificacion(self):
         obj_temp=Restaurante(self.__id_restaurante)
@@ -110,18 +117,8 @@ class AdministradorLocal(Usuario):
         plt.ylabel("CALIFICACIÓN")
         plt.title(f"Calificación comentarios")
         plt.show()
-    
-    def mirarPalabrasRepetidas(self,actualizar=False,lista_palabras=None):
-        
-        if actualizar==True:
-            obj_temp=Restaurante(self.__id_restaurante)
-            self.__palabras_repetidas=obj_temp.palabrasRepetidas(lista_palabras)
-        
-        return self.__palabras_repetidas
-    
 
-
-    def palabrasRepetidas(self,lista_palabras:list) -> dict:
+    def palabrasRepetidas(self,palabras_a_buscar:list=None) -> dict:
         
         cur.execute("SELECT no_stop_words FROM comentarios WHERE id_restaurante=?",(self.__id_restaurante))
         lista_comentarios=cur.fetchall()
@@ -129,7 +126,7 @@ class AdministradorLocal(Usuario):
         repetidas={}
 
         #Si no selecciono ninguna palabra en especifico
-        if lista_palabras==None:
+        if palabras_a_buscar==None:
 
             #Se miran todas las palabras y se guarda cuantas veces estan repetidas
             for i in range(len(lista_comentarios)):
@@ -155,13 +152,13 @@ class AdministradorLocal(Usuario):
             #Se miran todas las palabras y se guarda cuantas veces estan repetidas
                 contando=TextBlob(lista_comentarios[i][0])
 
-                for j in range(len(lista_palabras)):
-                    count=contando.word_counts[lista_palabras[j]]
+                for j in range(len(palabras_a_buscar)):
+                    count=contando.word_counts[palabras_a_buscar[j]]
 
-                    if lista_palabras[j] in repetidas: 
-                        repetidas[lista_palabras[j]]+=count #Se guardan las palabras 
+                    if palabras_a_buscar[j] in repetidas: 
+                        repetidas[palabras_a_buscar[j]]+=count #Se guardan las palabras 
                     else:
-                        repetidas[lista_palabras[j]]=count #Se guardan las palabras 
+                        repetidas[palabras_a_buscar[j]]=count #Se guardan las palabras 
 
         return repetidas
 
