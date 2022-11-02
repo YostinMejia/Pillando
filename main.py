@@ -10,9 +10,9 @@ from usuario_universidadadminstrador import *
 
 
 if __name__=="__main__":
-
+    
     # Prueba administrador general Listo
-    # admingeneral=AdministradorGeneral("4","pan","rodrigo","gerente")
+    admingeneral=AdministradorGeneral("4","pan","rodrigo","gerente")
     # admingeneral.actualizarCalificacionComentarios("2") #importante porque aveces se acaba el espacio para traducir
     # admingeneral.actualizarCalificacionRestaurante("2")
     # admingeneral.actualizarCalificacionRestaurante("6")
@@ -47,7 +47,7 @@ if __name__=="__main__":
     # rest=Restaurante("2")
 
     #Usuarios Listo
-    user_estudiante=Estudiante("2","canca","pablo","sistemas")
+    # user_estudiante=Estudiante("2","canca","pablo","sistemas")
     # print(user_estudiante.misComentarios())
     # print(user_estudiante.enviarComentarioProducto("7","salchipapas deliciosa, muy fresca y orgánica"))
     # print(user_estudiante.enviarComentarioRestaurante("10","Buena comida, excelente atención de sara"))

@@ -34,14 +34,14 @@ class Restaurante:
         self.__horario=datos[0][4]
             
 
-    def mirarUbicacion(self):
+    def mirarUbicacion(self)-> str:
         return self.__ubicacion
     
-    def mirarHorario(self):
+    def mirarHorario(self)->str:
         return self.__horario
 
 
-    def mirarCalificacion(self):
+    def mirarCalificacion(self)->float:
         return self.__calificacion
 
 
